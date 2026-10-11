@@ -1,7 +1,7 @@
 <?php
-declare(strict_types=1);
 
-// Envía una respuesta JSON y termina la petición.
+
+// Envía una respuesta JSON y finaliza la petición.
 function responder(int $estado, array $datos): void
 {
     http_response_code($estado);
@@ -15,14 +15,14 @@ function responder(int $estado, array $datos): void
     exit;
 }
 
-$ruta = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// Obtiene la ruta y el método de la petición.
+$ruta = $_GET['ruta'] ?? parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $metodo = $_SERVER['REQUEST_METHOD'];
 
-// Rutas permitidas: no se exponen los archivos internos de back.
 $rutas = [
     '/' => 'GET',
     '/index.php' => 'GET',
-    '/logicaNegocioFakeWEB.js' => 'GET',
+    '/LogicaNegocioFakeWEB.js' => 'GET',
     '/Guardamedicion' => 'POST',
     '/recuperamedicion' => 'GET',
 ];
@@ -36,28 +36,25 @@ if ($metodo !== $rutas[$ruta]) {
     responder(405, ['error' => 'Método no permitido.']);
 }
 
-// Muestra el frontend en el mismo servidor que la API.
+// Muestra la página web.
 if ($ruta === '/' || $ruta === '/index.php') {
     header('Content-Type: text/html; charset=utf-8');
     require __DIR__ . '/../index.php';
     exit;
 }
 
-// Entrega la clase JavaScript utilizada por el frontend.
-if ($ruta === '/logicaNegocioFakeWEB.js') {
+// Entrega el archivo JavaScript.
+if ($ruta === '/LogicaNegocioFakeWEB.js') {
     header('Content-Type: application/javascript; charset=utf-8');
-    readfile(__DIR__ . '/../logicaNegocioFakeWEB.js');
+    readfile(__DIR__ . '/../LogicaNegocioFakeWEB.js');
     exit;
 }
 
 try {
-    /*
-     * POST /Guardamedicion
-     * Recibe fecha, tipo, valor, major y minor mediante JSON.
-     * El servidor comprueba su formato y llama a guardarMedicion().
-     * El ID se genera automáticamente; no debe enviarse.
-     */
+
+    // POST: guarda una nueva medición.
     if ($ruta === '/Guardamedicion') {
+
         $tipoContenido = strtolower(trim(explode(
             ';',
             $_SERVER['CONTENT_TYPE'] ?? ''
@@ -77,7 +74,9 @@ try {
                 JSON_THROW_ON_ERROR
             );
         } catch (JsonException $error) {
-            responder(400, ['error' => 'El JSON no es válido.']);
+            responder(400, [
+                'error' => 'El JSON no es válido.',
+            ]);
         }
 
         if (!$datos instanceof stdClass) {
@@ -86,7 +85,8 @@ try {
             ]);
         }
 
-        foreach (['fecha', 'tipo', 'valor', 'major', 'minor'] as $campo) {
+        // Solo son obligatorios estos tres campos.
+        foreach (['fecha', 'tipo', 'valor'] as $campo) {
             if (!isset($datos->$campo)) {
                 responder(400, [
                     'error' => "Falta el campo obligatorio: $campo.",
@@ -94,19 +94,18 @@ try {
             }
         }
 
+        // Comprueba los tipos de los datos necesarios.
         if (
             !is_string($datos->fecha) ||
             !is_string($datos->tipo) ||
-            !(is_int($datos->valor) || is_float($datos->valor)) ||
-            !is_int($datos->major) ||
-            !is_int($datos->minor)
+            !(is_int($datos->valor) || is_float($datos->valor))
         ) {
             responder(400, [
                 'error' => 'Los tipos de los campos no son válidos.',
             ]);
         }
 
-        // Convierte la fecha al tipo que espera LogicaNegocio.
+        // Convierte y valida la fecha.
         $fecha = DateTimeImmutable::createFromFormat(
             '!Y-m-d H:i:s',
             $datos->fecha
@@ -114,30 +113,26 @@ try {
 
         if (!$fecha || $fecha->format('Y-m-d H:i:s') !== $datos->fecha) {
             responder(400, [
-                'error' => 'fecha debe ser válida y tener formato YYYY-MM-DD HH:MM:SS.',
+                'error' => 'fecha debe tener formato YYYY-MM-DD HH:MM:SS.',
             ]);
         }
 
+        // Conecta con la lógica de negocio.
         $logica = require __DIR__ . '/conexion.php';
 
+        // Guarda únicamente los datos necesarios.
         $id = $logica->guardarMedicion(
             $fecha,
             $datos->tipo,
-            (float) $datos->valor,
-            $datos->major,
-            $datos->minor
+            (float) $datos->valor
         );
 
         responder(201, ['id' => $id]);
     }
 
-    /*
-     * GET /recuperamedicion
-     * Pide la última medición a la lógica de negocio.
-     * Devuelve sus seis campos, o un error 404 si la tabla está vacía.
-     * El frontend decide mostrar únicamente id, tipo y valor.
-     */
+    // GET: recupera la última medición.
     $logica = require __DIR__ . '/conexion.php';
+
     $medicion = $logica->recuperarMedicion();
 
     if ($medicion === null) {
@@ -147,11 +142,15 @@ try {
     }
 
     responder(200, $medicion);
+
 } catch (InvalidArgumentException $error) {
-    // La lógica de negocio ha rechazado los valores recibidos.
-    responder(422, ['error' => $error->getMessage()]);
+
+    responder(422, [
+        'error' => $error->getMessage(),
+    ]);
+
 } catch (Throwable $error) {
-    // Los detalles internos quedan en el registro del servidor.
+
     error_log((string) $error);
 
     responder(500, [

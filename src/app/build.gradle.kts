@@ -8,13 +8,15 @@ android {
 
     defaultConfig {
         applicationId = "org.jordi.btlealumnos2021"
+
         minSdk = 28
-        targetSdk = 28
+        targetSdk = 33
 
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner =
+            "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -29,8 +31,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
@@ -40,6 +42,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.0")
 
     testImplementation("junit:junit:4.13.2")
+
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
 }

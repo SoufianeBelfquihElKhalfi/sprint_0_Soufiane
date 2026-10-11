@@ -1,144 +1,64 @@
 package com.examplo.sbelelk.appbiometria;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-// -----------------------------------------------------------------------------------
-// @author: Jordi Bataller i Mascarell
-// -----------------------------------------------------------------------------------
 public class Utilidades {
+    public static byte[] stringToBytes(String texto) {
+        return texto.getBytes(StandardCharsets.UTF_8);
+    }
 
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public static byte[] stringToBytes ( String texto ) {
-        return texto.getBytes();
-        // byte[] b = string.getBytes(StandardCharsets.UTF_8); // Ja
-    } // ()
+    public static UUID stringToUUID(String texto) {
+        byte[] bytes = stringToBytes(texto);
+        if (bytes.length != 16) throw new IllegalArgumentException("El texto debe ocupar 16 bytes UTF-8");
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        return new UUID(buffer.getLong(), buffer.getLong());
+    }
 
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public static UUID stringToUUID( String uuid ) {
-        if ( uuid.length() != 16 ) {
-            throw new Error( "stringUUID: string no tiene 16 caracteres ");
-        }
-        byte[] comoBytes = uuid.getBytes();
+    public static String uuidToString(UUID uuid) {
+        return bytesToString(dosLongToBytes(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits()));
+    }
 
-        String masSignificativo = uuid.substring(0, 8);
-        String menosSignificativo = uuid.substring(8, 16);
-        UUID res = new UUID( Utilidades.bytesToLong( masSignificativo.getBytes() ), Utilidades.bytesToLong( menosSignificativo.getBytes() ) );
+    public static String uuidToHexString(UUID uuid) {
+        return bytesToHexString(dosLongToBytes(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits()));
+    }
 
-        // Log.d( MainActivity.ETIQUETA_LOG, " \n\n***** stringToUUID *** " + uuid  + "=?=" + Utilidades.uuidToString( res ) );
+    public static String bytesToString(byte[] bytes) {
+        return bytes == null ? "" : new String(bytes, StandardCharsets.UTF_8);
+    }
 
-        // UUID res = UUID.nameUUIDFromBytes( comoBytes ); no va como quiero
+    public static byte[] dosLongToBytes(long mas, long menos) {
+        return ByteBuffer.allocate(16).putLong(mas).putLong(menos).array();
+    }
 
-        return res;
-    } // ()
+    /** Entero sin signo en big endian; major y minor deben estar entre 0 y 65535. */
+    public static int bytesToInt(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) return 0;
+        if (bytes.length > 4) throw new IllegalArgumentException("Máximo 4 bytes");
+        int valor = 0;
+        for (byte b : bytes) valor = (valor << 8) | (b & 0xff);
+        return valor;
+    }
 
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public static String uuidToString ( UUID uuid ) {
-        return bytesToString( dosLongToBytes( uuid.getMostSignificantBits(), uuid.getLeastSignificantBits() ) );
-    } // ()
+    public static int bytesToIntOK(byte[] bytes) { return bytesToInt(bytes); }
 
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public static String uuidToHexString ( UUID uuid ) {
-        return bytesToHexString( dosLongToBytes( uuid.getMostSignificantBits(), uuid.getLeastSignificantBits() ) );
-    } // ()
+    public static long bytesToLong(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) return 0;
+        if (bytes.length > 8) throw new IllegalArgumentException("Máximo 8 bytes");
+        long valor = 0;
+        for (byte b : bytes) valor = (valor << 8) | (b & 0xff);
+        return valor;
+    }
 
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public static String bytesToString( byte[] bytes ) {
-        if (bytes == null ) {
-            return "";
-        }
-
-        StringBuilder sb = new StringBuilder();
+    public static String bytesToHexString(byte[] bytes) {
+        if (bytes == null) return "";
+        char[] hex = "0123456789abcdef".toCharArray();
+        StringBuilder texto = new StringBuilder();
         for (byte b : bytes) {
-            sb.append( (char) b );
+            if (texto.length() > 0) texto.append(':');
+            texto.append(hex[(b & 0xff) >>> 4]).append(hex[b & 0x0f]);
         }
-        return sb.toString();
+        return texto.toString();
     }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public static byte[] dosLongToBytes( long masSignificativos, long menosSignificativos ) {
-        ByteBuffer buffer = ByteBuffer.allocate( 2 * Long.BYTES );
-        buffer.putLong( masSignificativos );
-        buffer.putLong( menosSignificativos );
-        return buffer.array();
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public static int bytesToInt( byte[] bytes ) {
-        return new BigInteger(bytes).intValue();
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public static long bytesToLong( byte[] bytes ) {
-        return new BigInteger(bytes).longValue();
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public static int bytesToIntOK( byte[] bytes ) {
-        if (bytes == null ) {
-            return 0;
-        }
-
-        if ( bytes.length > 4 ) {
-            throw new Error( "demasiados bytes para pasar a int ");
-        }
-        int res = 0;
-
-
-
-        for( byte b : bytes ) {
-           /*
-           Log.d( MainActivity.ETIQUETA_LOG, "bytesToInt(): byte: hex=" + Integer.toHexString( b )
-                   + " dec=" + b + " bin=" + Integer.toBinaryString( b ) +
-                   " hex=" + Byte.toString( b )
-           );
-           */
-            res =  (res << 8) // * 16
-                    + (b & 0xFF); // para quedarse con 1 byte (2 cuartetos) de lo que haya en b
-        } // for
-
-        if ( (bytes[ 0 ] & 0x8) != 0 ) {
-            // si tiene signo negativo (un 1 a la izquierda del primer byte
-            res = -(~(byte)res)-1; // complemento a 2 (~) de res pero como byte, -1
-        }
-       /*
-        Log.d( MainActivity.ETIQUETA_LOG, "bytesToInt(): res = " + res + " ~res=" + (res ^ 0xffff)
-                + "~res=" + ~((byte) res)
-        );
-        */
-
-        return res;
-    } // ()
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public static String bytesToHexString( byte[] bytes ) {
-
-        if (bytes == null ) {
-            return "";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
-            sb.append(':');
-        }
-        return sb.toString();
-    } // ()
-} // class
-// -----------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------
-
-
+}

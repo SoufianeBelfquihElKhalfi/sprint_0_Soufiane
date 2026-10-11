@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-class logicaNegocio
+class LogicaNegocio
 {
     private PDO $conexion;
 
@@ -15,51 +15,37 @@ class logicaNegocio
         );
     }
 
-    // Guarda la medición y devuelve el ID generado automáticamente.
+    // Guarda la medición y devuelve el ID generado.
     public function guardarMedicion(
         DateTimeInterface $fecha,
         string $tipo,
-        float $valor,
-        int $major,
-        int $minor
+        float $valor
     ): string {
-        // Los números naturales no pueden ser negativos.
-        if ($major < 0 || $minor < 0) {
-            throw new InvalidArgumentException(
-                'major y minor deben ser enteros no negativos.'
-            );
-        }
-
         if (!is_finite($valor)) {
             throw new InvalidArgumentException(
                 'valor debe ser un número finito.'
             );
         }
 
-        // No se incluye id: lo genera la base de datos.
-        // La consulta preparada mantiene los datos separados del SQL.
         $consulta = $this->conexion->prepare(
-            'INSERT INTO Medicion (fecha, tipo, valor, major, minor)
-             VALUES (:fecha, :tipo, :valor, :major, :minor)'
+            'INSERT INTO Medicion (fecha, tipo, valor)
+             VALUES (:fecha, :tipo, :valor)'
         );
 
         $consulta->execute([
             'fecha' => $fecha->format('Y-m-d H:i:s'),
             'tipo'  => $tipo,
             'valor' => $valor,
-            'major' => $major,
-            'minor' => $minor,
         ]);
 
-        // PDO devuelve el identificador como texto.
         return $this->conexion->lastInsertId();
     }
 
-    // Recupera todos los campos de la medición con el mayor ID.
+    // Recupera la última medición.
     public function recuperarMedicion(): ?array
     {
         $consulta = $this->conexion->query(
-            'SELECT id, fecha, tipo, valor, major, minor
+            'SELECT id, fecha, tipo, valor
              FROM Medicion
              ORDER BY id DESC
              LIMIT 1'
@@ -67,7 +53,6 @@ class logicaNegocio
 
         $medicion = $consulta->fetch(PDO::FETCH_ASSOC);
 
-        // Si la tabla está vacía, devuelve null.
         return $medicion === false ? null : $medicion;
     }
 }

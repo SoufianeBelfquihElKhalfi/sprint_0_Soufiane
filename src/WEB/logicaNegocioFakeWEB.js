@@ -1,7 +1,7 @@
 class LogicaNegocioFakeWEB {
     // Consulta el servidor REST y devuelve la medición recibida en JSON.
     async recuperarMedicion() {
-        const respuesta = await fetch('/recuperamedicion', {
+        const respuesta = await fetch('./back/servidor.php?ruta=/recuperamedicion', {
             headers: { Accept: 'application/json' },
             cache: 'no-store'
         });

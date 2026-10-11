@@ -1,13 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Permisos para la configuración actual: targetSdk = 28 -->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Permisos de Bluetooth para Android 11 y anteriores. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
 
-    <!-- La aplicación necesita Bluetooth Low Energy -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+
+    <!-- Permisos de Bluetooth para Android 12 y posteriores. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN" />
+
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <!-- Ubicación para el escaneo BLE, incluidos los anuncios iBeacon. -->
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-permission
+        android:name="android.permission.INTERNET" />
+
+    <!-- La aplicación necesita Bluetooth Low Energy. -->
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />

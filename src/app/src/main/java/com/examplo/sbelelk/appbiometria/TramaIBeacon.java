@@ -2,112 +2,65 @@ package com.examplo.sbelelk.appbiometria;
 
 import java.util.Arrays;
 
-// -----------------------------------------------------------------------------------
-// @author: Jordi Bataller i Mascarell
-// -----------------------------------------------------------------------------------
+/** Lee un anuncio BLE completo; solo interpreta los bloques iBeacon válidos. */
 public class TramaIBeacon {
-    private byte[] prefijo = null; // 9 bytes
-    private byte[] uuid = null; // 16 bytes
-    private byte[] major = null; // 2 bytes
-    private byte[] minor = null; // 2 bytes
-    private byte txPower = 0; // 1 byte
+    private byte[] prefijo = new byte[0];
+    private byte[] uuid = new byte[0];
+    private byte[] major = new byte[0];
+    private byte[] minor = new byte[0];
+    private byte txPower;
+    private final byte[] losBytes;
+    private byte[] advFlags = new byte[0];
+    private byte[] advHeader = new byte[0];
+    private byte[] companyID = new byte[0];
+    private byte iBeaconType;
+    private byte iBeaconLength;
+    private boolean valido;
 
-    private byte[] losBytes;
-
-    private byte[] advFlags = null; // 3 bytes
-    private byte[] advHeader = null; // 2 bytes
-    private byte[] companyID = new byte[2]; // 2 bytes
-    private byte iBeaconType = 0 ; // 1 byte
-    private byte iBeaconLength = 0 ; // 1 byte
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public byte[] getPrefijo() {
-        return prefijo;
+    public TramaIBeacon(byte[] bytes) {
+        losBytes = bytes == null ? new byte[0] : bytes.clone();
+        for (int indice = 0; indice < losBytes.length;) {
+            int longitud = losBytes[indice] & 0xff;
+            if (longitud == 0) break;
+            // La longitud incluye el tipo, pero NO el propio byte de longitud.
+            int fin = indice + 1 + longitud;
+            if (fin > losBytes.length) break;
+            int tipo = losBytes[indice + 1] & 0xff;
+            if (tipo == 0x01 && longitud == 2) {
+                advFlags = Arrays.copyOfRange(losBytes, indice, fin);
+            }
+            int datos = indice + 2;
+            if (!valido && tipo == 0xff && longitud == 26
+                    && (losBytes[datos] & 0xff) == 0x4c
+                    && losBytes[datos + 1] == 0x00
+                    && losBytes[datos + 2] == 0x02
+                    && losBytes[datos + 3] == 0x15) {
+                advHeader = Arrays.copyOfRange(losBytes, indice, datos);
+                companyID = Arrays.copyOfRange(losBytes, datos, datos + 2);
+                iBeaconType = losBytes[datos + 2];
+                iBeaconLength = losBytes[datos + 3];
+                int inicioUuid = datos + 4;
+                prefijo = Arrays.copyOfRange(losBytes, 0, inicioUuid);
+                uuid = Arrays.copyOfRange(losBytes, inicioUuid, inicioUuid + 16);
+                major = Arrays.copyOfRange(losBytes, inicioUuid + 16, inicioUuid + 18);
+                minor = Arrays.copyOfRange(losBytes, inicioUuid + 18, inicioUuid + 20);
+                txPower = losBytes[inicioUuid + 20];
+                valido = true;
+            }
+            indice = fin;
+        }
     }
 
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public byte[] getUUID() {
-        return uuid;
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public byte[] getMajor() {
-        return major;
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public byte[] getMinor() {
-        return minor;
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public byte getTxPower() {
-        return txPower;
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public byte[] getLosBytes() {
-        return losBytes;
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public byte[] getAdvFlags() {
-        return advFlags;
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public byte[] getAdvHeader() {
-        return advHeader;
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public byte[] getCompanyID() {
-        return companyID;
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public byte getiBeaconType() {
-        return iBeaconType;
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public byte getiBeaconLength() {
-        return iBeaconLength;
-    }
-
-    // -------------------------------------------------------------------------------
-    // -------------------------------------------------------------------------------
-    public TramaIBeacon(byte[] bytes ) {
-        this.losBytes = bytes;
-
-        prefijo = Arrays.copyOfRange(losBytes, 0, 8+1 ); // 9 bytes
-        uuid = Arrays.copyOfRange(losBytes, 9, 24+1 ); // 16 bytes
-        major = Arrays.copyOfRange(losBytes, 25, 26+1 ); // 2 bytes
-        minor = Arrays.copyOfRange(losBytes, 27, 28+1 ); // 2 bytes
-        txPower = losBytes[ 29 ]; // 1 byte
-
-        advFlags = Arrays.copyOfRange( prefijo, 0, 2+1 ); // 3 bytes
-        advHeader = Arrays.copyOfRange( prefijo, 3, 4+1 ); // 2 bytes
-        companyID = Arrays.copyOfRange( prefijo, 5, 6+1 ); // 2 bytes
-        iBeaconType = prefijo[ 7 ]; // 1 byte
-        iBeaconLength = prefijo[ 8 ]; // 1 byte
-
-    } // ()
-} // class
-// -----------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------
-
-
+    public boolean esIBeacon() { return valido; }
+    public byte[] getPrefijo() { return prefijo.clone(); }
+    public byte[] getUUID() { return uuid.clone(); }
+    public byte[] getMajor() { return major.clone(); }
+    public byte[] getMinor() { return minor.clone(); }
+    public byte getTxPower() { return txPower; }
+    public byte[] getLosBytes() { return losBytes.clone(); }
+    public byte[] getAdvFlags() { return advFlags.clone(); }
+    public byte[] getAdvHeader() { return advHeader.clone(); }
+    public byte[] getCompanyID() { return companyID.clone(); }
+    public byte getiBeaconType() { return iBeaconType; }
+    public byte getiBeaconLength() { return iBeaconLength; }
+}

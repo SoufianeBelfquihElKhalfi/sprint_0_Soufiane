@@ -1,7 +1,8 @@
+
 <?php
 declare(strict_types=1);
 
-// Requiere la extensión cURL de PHP y el servidor en funcionamiento.
+// Realiza una petición al servidor.
 function peticion(string $ruta, ?array $datos = null): array
 {
     $curl = curl_init('http://localhost:8000' . $ruta);
@@ -40,6 +41,7 @@ function peticion(string $ruta, ?array $datos = null): array
     ];
 }
 
+// Comprueba que se cumpla una condición.
 function verificar(bool $condicion, string $mensaje): void
 {
     if (!$condicion) {
@@ -47,28 +49,43 @@ function verificar(bool $condicion, string $mensaje): void
     }
 }
 
+// Datos de prueba.
+// Incluye campos adicionales para comprobar
+// que el servidor los ignora.
 $medicion = [
     'fecha' => '2026-09-29 10:00:00',
     'tipo' => 'temperatura',
     'valor' => 23.5,
-    'major' => 1,
-    'minor' => 2,
+    'major' => 2821,
+    'minor' => 1234,
 ];
 
-// Comprueba que POST guarda la medición y devuelve su ID.
+// Guarda una medición.
 [$estado, $guardada] = peticion('/Guardamedicion', $medicion);
 
 verificar($estado === 201, 'POST debe devolver 201.');
 verificar(isset($guardada['id']), 'POST debe devolver un ID.');
 
-// Comprueba que GET recupera esa misma medición.
+// Recupera la última medición.
 [$estado, $recuperada] = peticion('/recuperamedicion');
 
 verificar($estado === 200, 'GET debe devolver 200.');
 
-foreach (['id', 'fecha', 'tipo', 'valor', 'major', 'minor'] as $campo) {
+// Comprueba los campos necesarios.
+foreach (['id', 'fecha', 'tipo', 'valor'] as $campo) {
     verificar(isset($recuperada[$campo]), "Falta el campo $campo.");
 }
+
+// Comprueba que los campos adicionales no se devuelven.
+verificar(
+    !array_key_exists('major', $recuperada),
+    'Se ha devuelto un campo que debía ignorarse.'
+);
+
+verificar(
+    !array_key_exists('minor', $recuperada),
+    'Se ha devuelto un campo que debía ignorarse.'
+);
 
 verificar(
     (string) $recuperada['id'] === (string) $guardada['id'],
@@ -88,16 +105,6 @@ verificar(
 verificar(
     abs((float) $recuperada['valor'] - $medicion['valor']) < 0.000001,
     'El valor debe coincidir.'
-);
-
-verificar(
-    (int) $recuperada['major'] === $medicion['major'],
-    'major debe coincidir.'
-);
-
-verificar(
-    (int) $recuperada['minor'] === $medicion['minor'],
-    'minor debe coincidir.'
 );
 
 echo "Prueba correcta: medición guardada y recuperada.\n";
