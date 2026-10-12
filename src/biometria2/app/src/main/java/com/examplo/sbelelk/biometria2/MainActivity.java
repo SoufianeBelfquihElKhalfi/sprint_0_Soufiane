@@ -24,6 +24,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,6 +32,14 @@ public class MainActivity extends AppCompatActivity {
     private static final int CODIGO_PERMISO_UBICACION = 100;
     private static final int CODIGO_PERMISOS_BLUETOOTH = 101;
     private static final int CODIGO_ACTIVAR_BLUETOOTH = 102;
+    private TextView textoIdMedicion;
+    private TextView textoFechaMedicion;
+    private TextView textoTipoMedicion;
+    private TextView textoValorMedicion;
+
+    private long ultimoEnvioMs = 0;
+
+    private static final long INTERVALO_MINIMO_ENVIO_MS = 20000;
 
     // Nombre del dispositivo que queremos buscar.
     private static final String NOMBRE_DISPOSITIVO = "GTI-Soufiane";
@@ -45,9 +54,17 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean escaneando = false;
 
+    // Lógica fake para comunicarnos con el servidor REST.
+    private LogicaNegocioFake logicaNegocioFake;
+
     // --------------------------------------------------------------
     // Se ejecuta al abrir la aplicación.
     // --------------------------------------------------------------
+
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +73,29 @@ public class MainActivity extends AppCompatActivity {
         Log.d(ETIQUETA_LOG, "Aplicación iniciada");
 
         inicializarBlueTooth();
+
+        // Inicializamos la lógica fake.
+        logicaNegocioFake = new LogicaNegocioFake();
+
+        // Referencias a los textos de la pantalla.
+        textoIdMedicion = findViewById(
+                R.id.textoIdMedicion
+        );
+
+        textoFechaMedicion = findViewById(
+                R.id.textoFechaMedicion
+        );
+
+        textoTipoMedicion = findViewById(
+                R.id.textoTipoMedicion
+        );
+
+        textoValorMedicion = findViewById(
+                R.id.textoValorMedicion
+        );
     }
+
+
 
     // --------------------------------------------------------------
     // Inicializa Bluetooth sin utilizar permisos incompatibles.
@@ -391,12 +430,182 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(ETIQUETA_LOG,
                         "Trama BLE: " +
                                 Utilidades.bytesToHexString(bytes));
+
+                // NUEVO: interpretamos la trama iBeacon.
+                mostrarDatosIBeacon(bytes);
             }
         }
 
         Log.d(ETIQUETA_LOG,
                 "------------------------------------");
     }
+
+    // --------------------------------------------------------------
+    // NUEVO: busca una trama iBeacon y muestra sus datos.
+    // --------------------------------------------------------------
+
+    private void mostrarDatosIBeacon(byte[] bytes) {
+
+        if (bytes == null) {
+            return;
+        }
+
+        // Recorremos los bloques del anuncio BLE.
+        int posicion = 0;
+
+        while (posicion < bytes.length) {
+
+            int longitud = bytes[posicion] & 0xFF;
+
+            if (longitud == 0) {
+                break;
+            }
+
+            int fin = posicion + longitud + 1;
+
+            // Evitamos leer fuera del array.
+            if (fin > bytes.length) {
+                break;
+            }
+
+            int tipo = bytes[posicion + 1] & 0xFF;
+
+            // 0xFF indica datos del fabricante.
+            if (tipo == 0xFF && longitud >= 26) {
+
+                int inicio = posicion + 2;
+
+                // Comprobamos que sea una trama iBeacon.
+                boolean esIBeacon =
+                        (bytes[inicio] & 0xFF) == 0x4C &&
+                                (bytes[inicio + 1] & 0xFF) == 0x00 &&
+                                (bytes[inicio + 2] & 0xFF) == 0x02 &&
+                                (bytes[inicio + 3] & 0xFF) == 0x15;
+
+                if (esIBeacon) {
+
+                    // Construimos los 30 bytes que necesita
+                    // nuestra clase TramaIBeacon.
+                    byte[] trama = new byte[30];
+
+                    trama[0] = 0x02;
+                    trama[1] = 0x01;
+                    trama[2] = 0x06;
+                    trama[3] = 0x1A;
+                    trama[4] = (byte) 0xFF;
+
+                    System.arraycopy(
+                            bytes,
+                            inicio,
+                            trama,
+                            5,
+                            25
+                    );
+
+                    TramaIBeacon ibeacon =
+                            new TramaIBeacon(trama);
+
+                    // Obtenemos el UUID.
+                    String uuid = new String(
+                            ibeacon.getUUID(),
+                            java.nio.charset.StandardCharsets.US_ASCII
+                    );
+
+                    // Solo aceptamos los iBeacon de nuestro proyecto.
+                    if (!uuid.equals("EPSG-GTI-PROY-3A")) {
+
+                        Log.d(ETIQUETA_LOG,
+                                "iBeacon de otro proyecto. No se envía.");
+
+                        return;
+                    }
+
+                    // Obtenemos major y minor.
+                    byte[] bytesMajor = ibeacon.getMajor();
+                    byte[] bytesMinor = ibeacon.getMinor();
+
+                    int major =
+                            ((bytesMajor[0] & 0xFF) << 8) |
+                                    (bytesMajor[1] & 0xFF);
+
+                    int minor =
+                            ((bytesMinor[0] & 0xFF) << 8) |
+                                    (bytesMinor[1] & 0xFF);
+
+                    Log.d(ETIQUETA_LOG,
+                            "===== DATOS IBEACON =====");
+
+                    Log.d(ETIQUETA_LOG, "UUID: " + uuid);
+                    Log.d(ETIQUETA_LOG, "Major: " + major);
+                    Log.d(ETIQUETA_LOG, "Minor: " + minor);
+                    Log.d(ETIQUETA_LOG,
+                            "TxPower: " + ibeacon.getTxPower());
+
+                    // --------------------------------------------------
+                    // Controlamos el tiempo entre envíos.
+                    // --------------------------------------------------
+                    long ahora =
+                            android.os.SystemClock.elapsedRealtime();
+
+                    if (ultimoEnvioMs != 0 &&
+                            ahora - ultimoEnvioMs <
+                                    INTERVALO_MINIMO_ENVIO_MS) {
+
+                        Log.d(ETIQUETA_LOG,
+                                "Esperando siguiente envío BLE");
+
+                        return;
+                    }
+
+                    // Guardamos el momento del envío.
+                    ultimoEnvioMs = ahora;
+
+                    // --------------------------------------------------
+                    // Creamos la medición con el minor recibido.
+                    // --------------------------------------------------
+                    java.text.SimpleDateFormat formato =
+                            new java.text.SimpleDateFormat(
+                                    "yyyy-MM-dd HH:mm:ss",
+                                    java.util.Locale.getDefault()
+                            );
+
+                    String fecha =
+                            formato.format(new java.util.Date());
+
+                    Medicion medicion = new Medicion(
+                            fecha,
+                            "O3",
+                            minor
+                    );
+
+                    // --------------------------------------------------
+                    // Enviamos la medición al servidor REST.
+                    // --------------------------------------------------
+                    logicaNegocioFake.guardarMedicion(medicion);
+
+                    Log.d(ETIQUETA_LOG,
+                            "MEDICIÓN ENVIADA AL SERVIDOR");
+
+                    Log.d(ETIQUETA_LOG,
+                            "Fecha: " + fecha);
+
+                    Log.d(ETIQUETA_LOG,
+                            "Tipo: O3");
+
+                    Log.d(ETIQUETA_LOG,
+                            "Valor enviado: " + minor);
+
+                    return;
+                }
+            }
+
+            posicion = fin;
+        }
+
+        Log.d(ETIQUETA_LOG,
+                "No se encontró una trama iBeacon completa");
+    }
+
 
     // --------------------------------------------------------------
     // Botón 1: buscar todos los dispositivos BLE.
@@ -551,4 +760,59 @@ public class MainActivity extends AppCompatActivity {
 
         super.onDestroy();
     }
+
+
+    // --------------------------------------------------------------
+// Botón 4: recuperar la última medición del servidor.
+// --------------------------------------------------------------
+    public void botonActualizarMedicionPulsado(View v) {
+
+        Log.d(ETIQUETA_LOG,
+                "Botón ACTUALIZAR MEDICIÓN pulsado");
+
+        textoValorMedicion.setText("Consultando servidor...");
+
+        logicaNegocioFake.recuperarMedicion(
+                (medicion, error) -> {
+
+                    // Actualizamos la pantalla desde el hilo principal.
+                    runOnUiThread(() -> {
+
+                        if (error != null) {
+
+                            textoValorMedicion.setText(
+                                    "No se pudo recuperar la medición"
+                            );
+
+                            Log.e(ETIQUETA_LOG, error);
+                            return;
+                        }
+
+                        if (medicion == null) {
+                            return;
+                        }
+
+                        textoIdMedicion.setText(
+                                "ID: " + medicion.getId()
+                        );
+
+                        textoFechaMedicion.setText(
+                                "Fecha: " + medicion.getFecha()
+                        );
+
+                        textoTipoMedicion.setText(
+                                "Tipo: " + medicion.getTipo()
+                        );
+
+                        textoValorMedicion.setText(
+                                "Valor: " + medicion.getValor()
+                        );
+
+                        Log.d(ETIQUETA_LOG,
+                                "Medición mostrada en pantalla");
+                    });
+                }
+        );
+    }
+
 }

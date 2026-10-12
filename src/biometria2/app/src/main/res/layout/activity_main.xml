@@ -1,34 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.widget.LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:fillViewport="true">
 
-    <Button
-        android:id="@+id/botonBuscarDispositivosBTLE"
-        android:text="Buscar Dispositivos BTLE nou 4"
-        android:onClick="botonBuscarDispositivosBTLEPulsado"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <Button
-        android:id="@+id/botonDetenerBusquedaDispositivosBTLE"
-        android:text="Detener búsaqueda Dispositivos BTLE"
-        android:onClick="botonDetenerBusquedaDispositivosBTLEPulsado"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
+        <!-- Botones BLE originales -->
 
-    <Button
-        android:id="@+id/botonBuscarNuestroDispositivoBTLE"
-        android:text="Buscar nuestro dispositivo  BTLE"
-        android:onClick="botonBuscarNuestroDispositivoBTLEPulsado"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
+        <Button
+            android:id="@+id/botonBuscarDispositivosBTLE"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Buscar dispositivos BLE"
+            android:onClick="botonBuscarDispositivosBTLEPulsado" />
 
-</android.widget.LinearLayout>
+        <Button
+            android:id="@+id/botonDetenerBusquedaDispositivosBTLE"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Detener búsqueda"
+            android:onClick="botonDetenerBusquedaDispositivosBTLEPulsado" />
+
+        <Button
+            android:id="@+id/botonBuscarNuestroDispositivoBTLE"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Buscar nuestro dispositivo"
+            android:onClick="botonBuscarNuestroDispositivoBTLEPulsado" />
+
+        <!-- Última medición recuperada -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Última medición del servidor"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textoIdMedicion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="ID: --"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textoFechaMedicion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Fecha: --"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textoTipoMedicion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Tipo: --"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textoValorMedicion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Valor: --"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/botonActualizarMedicion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Actualizar medición"
+            android:onClick="botonActualizarMedicionPulsado" />
+
+    </LinearLayout>
+</ScrollView>
