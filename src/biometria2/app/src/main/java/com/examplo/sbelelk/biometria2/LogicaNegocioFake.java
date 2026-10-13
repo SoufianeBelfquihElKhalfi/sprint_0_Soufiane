@@ -50,6 +50,8 @@ public class LogicaNegocioFake {
                 json.put("fecha", medicion.getFecha());
                 json.put("tipo", medicion.getTipo());
                 json.put("valor", medicion.getValor());
+                Log.d(ETIQUETA_LOG,
+                        "DEBUG POST - JSON enviado: " + json.toString());
 
                 URL url = new URL(
                         URL_SERVIDOR + "/Guardamedicion"

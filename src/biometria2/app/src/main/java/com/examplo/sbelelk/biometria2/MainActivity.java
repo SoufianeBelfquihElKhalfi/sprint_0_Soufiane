@@ -532,6 +532,8 @@ public class MainActivity extends AppCompatActivity {
                             ((bytesMinor[0] & 0xFF) << 8) |
                                     (bytesMinor[1] & 0xFF);
 
+                    Log.d(ETIQUETA_LOG, "DEBUG 1 - Minor recibido: " + minor);
+
                     Log.d(ETIQUETA_LOG,
                             "===== DATOS IBEACON =====");
 
@@ -577,6 +579,9 @@ public class MainActivity extends AppCompatActivity {
                             "O3",
                             minor
                     );
+
+                    Log.d(ETIQUETA_LOG,
+                            "DEBUG 2 - Valor dentro de Medicion: " + medicion.getValor());
 
                     // --------------------------------------------------
                     // Enviamos la medición al servidor REST.
