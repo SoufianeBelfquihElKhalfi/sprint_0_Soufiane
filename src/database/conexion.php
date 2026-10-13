@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/logicaNegocio.php';
+require_once __DIR__ . '/../business_logic/logicaNegocio.php';
 
 
 $host = 'localhost';

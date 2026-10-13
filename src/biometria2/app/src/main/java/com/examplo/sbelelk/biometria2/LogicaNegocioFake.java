@@ -22,7 +22,7 @@ public class LogicaNegocioFake {
     private static final String ETIQUETA_LOG = ">>>>";
 
     private static final String URL_SERVIDOR =
-            "https://sbelelk.upv.edu.es/back/servidor.php?ruta=";
+            "https://sbelelk.upv.edu.es/communication/servidor.php?ruta=";
 
     // --------------------------------------------------------------
     // Permite devolver la medición recuperada a MainActivity.

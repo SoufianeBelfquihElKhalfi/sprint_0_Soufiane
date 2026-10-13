@@ -118,7 +118,7 @@ try {
         }
 
         // Conecta con la lógica de negocio.
-        $logica = require __DIR__ . '/conexion.php';
+        $logica = require __DIR__ . '/../database/conexion.php';
 
         // Guarda únicamente los datos necesarios.
         $id = $logica->guardarMedicion(
@@ -131,7 +131,7 @@ try {
     }
 
     // GET: recupera la última medición.
-    $logica = require __DIR__ . '/conexion.php';
+    $logica = require __DIR__ . '/../database/conexion.php';
 
     $medicion = $logica->recuperarMedicion();
 

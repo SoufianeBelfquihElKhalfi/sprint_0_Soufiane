@@ -95,7 +95,7 @@
         <p id="mensaje" role="status" hidden></p>
     </main>
 
-    <script src="./LogicaNegocioFakeWEB.js"></script>
+    <script src="/frontend_business_logic/logicaNegocioFakeWEB.js"></script>
     <script>
         const logica = new LogicaNegocioFakeWEB();
         const boton = document.getElementById('obtener');
