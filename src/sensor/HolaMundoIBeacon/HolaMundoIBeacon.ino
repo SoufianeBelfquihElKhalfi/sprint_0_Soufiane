@@ -137,7 +137,7 @@ uint16_t major = (12 << 8) | cont;
   // ------------------------------------------------------------
   // Publicar temperatura (valor de prueba: 1234)
   // ------------------------------------------------------------
-  int valorTemperatura = 4321;
+  int valorTemperatura = 3333;
 
   elPublicador.publicarTemperatura(
       valorTemperatura,
