@@ -1,4 +1,26 @@
+
 	// -*- mode: c++ -*-
+
+	// --------------------------------------------------------------
+	// Archivo: ServicioEnEmisora.h
+	//
+	// Descripción:
+	// Gestiona los servicios y las características Bluetooth LE
+	// utilizados por la emisora.
+	//
+	// Permite configurar identificadores UUID, propiedades,
+	// permisos de lectura y escritura, tamaños de datos
+	// y funciones de notificación.
+	//
+	// Autor original: Jordi Bataller i Mascarell
+	// Fecha original: 2019-07-17
+	//
+	// Integración: Soufiane Belfquih El Khalfi
+	// Proyecto: Biometría y Medio Ambiente - Sprint 0
+	// Aportación: Integración de la gestión de servicios BLE.
+	//
+	// Copyright: Soufiane
+	// --------------------------------------------------------------
 
 	// ----------------------------------------------------------
 	// Jordi Bataller i Mascarell
@@ -11,6 +33,18 @@
 	// ----------------------------------------------------
 	#include <vector>
 
+	// --------------------------------------------------------------
+	// Función: alReves()
+	//
+	// Diseño lógico:
+	// p: [T], n: Z --> alReves() --> [T]
+	//
+	// Recibe un array y el número de elementos.
+	// Invierte el orden de los primeros n elementos
+	// dentro del mismo array.
+	//
+	// Devuelve un puntero al array modificado.
+	// --------------------------------------------------------------
 	// ----------------------------------------------------
 	// alReves() utilidad
 	// pone al revés el contenido de una array en el mismo array
@@ -27,6 +61,20 @@
 		return p;
 	} // ()
 
+	// --------------------------------------------------------------
+	// Función: stringAUint8AlReves()
+	//
+	// Diseño lógico:
+	// pString: Text, pUint: [N], tamMax: Z
+	//     --> stringAUint8AlReves() --> [N]
+	//
+	// Recibe una cadena de texto y un array de bytes.
+	//
+	// Copia los caracteres al array en orden inverso,
+	// utilizando como máximo tamMax posiciones.
+	//
+	// Devuelve un puntero al array modificado.
+	// --------------------------------------------------------------
 	// ----------------------------------------------------
 	// ----------------------------------------------------
 	uint8_t * stringAUint8AlReves( const char * pString, uint8_t * pUint, int tamMax ) {
@@ -41,21 +89,62 @@
 		return pUint;
 	} // ()
 
+	// --------------------------------------------------------------
+	// Clase: ServicioEnEmisora
+	//
+	// Diseño lógico:
+	//
+	// ServicioEnEmisora = (
+	//     uuidServicio: [N]_16,
+	//     elServicio: BLEService,
+	//     lasCaracteristicas: [Caracteristica]
+	// )
+	//
+	// Representa un servicio Bluetooth LE.
+	//
+	// Permite añadir características y activar
+	// el servicio utilizando la biblioteca Bluefruit.
+	// --------------------------------------------------------------
 	// ----------------------------------------------------------
 	// ----------------------------------------------------------
 	class ServicioEnEmisora {
 
 	public:
 
-
 		// --------------------------------------------------------
 		// --------------------------------------------------------
 
+		// --------------------------------------------------------------
+		// Tipo: CallbackCaracteristicaEscrita
+		//
+		// Diseño lógico:
+		// conn_handle: N, chr: BLECharacteristic,
+		// data: [N], len: N --> CallbackCaracteristicaEscrita()
+		//
+		// Define la función que se ejecuta cuando un dispositivo
+		// escribe datos en una característica BLE.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		using CallbackCaracteristicaEscrita = void ( uint16_t conn_handle,
 													BLECharacteristic * chr,
 													uint8_t * data, uint16_t len); 
+
+		// --------------------------------------------------------------
+		// Clase: Caracteristica
+		//
+		// Diseño lógico:
+		//
+		// Caracteristica = (
+		//     uuidCaracteristica: [N]_16,
+		//     laCaracteristica: BLECharacteristic
+		// )
+		//
+		// Representa una característica de un servicio BLE.
+		//
+		// Permite configurar propiedades, permisos y tamaños,
+		// escribir datos, enviar notificaciones y registrar callbacks.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		class Caracteristica {
@@ -75,6 +164,15 @@
 
 		public:
 
+		// --------------------------------------------------------------
+		// Constructor: Caracteristica()
+		//
+		// Diseño lógico:
+		// nombreCaracteristica_: Text --> Caracteristica()
+		//
+		// Recibe el nombre de una característica y lo convierte
+		// en un UUID de 16 bytes.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		Caracteristica( const char * nombreCaracteristica_ )
@@ -84,6 +182,18 @@
 			
 		} // ()
 
+		// --------------------------------------------------------------
+		// Constructor: Caracteristica()
+		//
+		// Diseño lógico:
+		// nombreCaracteristica_: Text, props: N,
+		// permisoRead: SecureMode_t,
+		// permisoWrite: SecureMode_t, tam: N
+		//     --> Caracteristica()
+		//
+		// Crea una característica BLE y configura
+		// sus propiedades, permisos y tamaño máximo.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		Caracteristica( const char * nombreCaracteristica_ ,
@@ -98,6 +208,16 @@
 		} // ()
 
 		private:
+
+		// --------------------------------------------------------------
+		// Función: asignarPropiedades()
+		//
+		// Diseño lógico:
+		// props: N --> asignarPropiedades()
+		//
+		// Configura las propiedades de la característica BLE,
+		// como lectura, escritura o notificaciones.
+		// --------------------------------------------------------------
 		// .........................................................
 		// CHR_PROPS_WRITE , CHR_PROPS_READ ,  CHR_PROPS_NOTIFY 
 		// .........................................................
@@ -106,6 +226,16 @@
 			(*this).laCaracteristica.setProperties( props );
 		} // ()
 
+		// --------------------------------------------------------------
+		// Función: asignarPermisos()
+		//
+		// Diseño lógico:
+		// permisoRead: SecureMode_t,
+		// permisoWrite: SecureMode_t --> asignarPermisos()
+		//
+		// Establece los permisos de lectura y escritura
+		// de la característica BLE.
+		// --------------------------------------------------------------
 		// .........................................................
 		// SecureMode_t::SECMODE_OPEN  , SecureMode_t::SECMODE_NO_ACCESS
 		// .........................................................
@@ -114,6 +244,15 @@
 			(*this).laCaracteristica.setPermission( permisoRead, permisoWrite );
 		} // ()
 
+		// --------------------------------------------------------------
+		// Función: asignarTamanyoDatos()
+		//
+		// Diseño lógico:
+		// tam: N --> asignarTamanyoDatos()
+		//
+		// Establece la longitud máxima de los datos
+		// que puede almacenar la característica.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		void asignarTamanyoDatos( uint8_t tam ) {
@@ -124,6 +263,18 @@
 		} // ()
 
 		public:
+
+		// --------------------------------------------------------------
+		// Función: asignarPropiedadesPermisosYTamanyoDatos()
+		//
+		// Diseño lógico:
+		// props: N, permisoRead: SecureMode_t,
+		// permisoWrite: SecureMode_t, tam: N
+		//     --> asignarPropiedadesPermisosYTamanyoDatos()
+		//
+		// Configura las propiedades, permisos de lectura
+		// y escritura y tamaño máximo de los datos.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		void asignarPropiedadesPermisosYTamanyoDatos( uint8_t props,
@@ -136,6 +287,15 @@
 		} // ()
 													
 
+		// --------------------------------------------------------------
+		// Función: escribirDatos()
+		//
+		// Diseño lógico:
+		// str: Text --> escribirDatos() --> N
+		//
+		// Escribe una cadena en la característica BLE.
+		// Devuelve el número de bytes escritos.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		uint16_t escribirDatos( const char * str ) {
@@ -149,6 +309,15 @@
 			return r;
 		} // ()
 
+		// --------------------------------------------------------------
+		// Función: notificarDatos()
+		//
+		// Diseño lógico:
+		// str: Text --> notificarDatos() --> N
+		//
+		// Envía una notificación BLE con los datos recibidos.
+		// Devuelve el resultado numérico de la operación.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		uint16_t notificarDatos( const char * str ) {
@@ -158,12 +327,31 @@
 			return r;
 		} //  ()
 
+		// --------------------------------------------------------------
+		// Función: instalarCallbackCaracteristicaEscrita()
+		//
+		// Diseño lógico:
+		// cb: CallbackCaracteristicaEscrita
+		//     --> instalarCallbackCaracteristicaEscrita()
+		//
+		// Registra una función que se ejecutará
+		// cuando se escriban datos en la característica.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		void instalarCallbackCaracteristicaEscrita( CallbackCaracteristicaEscrita cb ) {
 			(*this).laCaracteristica.setWriteCallback( cb );
 		} // ()
 
+		// --------------------------------------------------------------
+		// Función: activar()
+		//
+		// Diseño lógico:
+		// activar()
+		//
+		// Inicializa la característica BLE y registra
+		// el resultado de la operación por el puerto serie.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		void activar() {
@@ -197,7 +385,16 @@
 		std::vector< Caracteristica * > lasCaracteristicas;
 
 	public:
-		
+
+		// --------------------------------------------------------------
+		// Constructor: ServicioEnEmisora()
+		//
+		// Diseño lógico:
+		// nombreServicio_: Text --> ServicioEnEmisora()
+		//
+		// Recibe el nombre del servicio y lo convierte
+		// en un UUID de 16 bytes.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		ServicioEnEmisora( const char * nombreServicio_ )
@@ -206,7 +403,16 @@
 		{
 		
 		} // ()
-		
+
+		// --------------------------------------------------------------
+		// Función: escribeUUID()
+		//
+		// Diseño lógico:
+		// escribeUUID()
+		//
+		// Muestra el identificador UUID del servicio
+		// mediante el puerto serie.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		void escribeUUID() {
@@ -217,12 +423,30 @@
 		Serial.println ( "\n**********" );
 		} // ()
 
+		// --------------------------------------------------------------
+		// Función: anyadirCaracteristica()
+		//
+		// Diseño lógico:
+		// car: Caracteristica --> anyadirCaracteristica()
+		//
+		// Añade una referencia a la característica recibida
+		// dentro de la colección de características del servicio.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		void anyadirCaracteristica( Caracteristica & car ) {
 		(*this).lasCaracteristicas.push_back( & car );
 		} // ()
 
+		// --------------------------------------------------------------
+		// Función: activarServicio()
+		//
+		// Diseño lógico:
+		// activarServicio()
+		//
+		// Inicializa el servicio Bluetooth LE.
+		// Recorre sus características y las activa.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		void activarServicio( ) {
@@ -239,6 +463,15 @@
 
 		} // ()
 
+		// --------------------------------------------------------------
+		// Función: operator BLEService&()
+		//
+		// Diseño lógico:
+		// operator BLEService&() --> BLEService
+		//
+		// Permite utilizar un objeto ServicioEnEmisora
+		// como referencia a un objeto BLEService.
+		// --------------------------------------------------------------
 		// .........................................................
 		// .........................................................
 		operator BLEService&() {

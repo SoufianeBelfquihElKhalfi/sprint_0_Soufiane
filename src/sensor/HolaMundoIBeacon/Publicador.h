@@ -1,4 +1,25 @@
-// -*- mode: c++ -*-
+
+ // -*- mode: c++ -*-
+
+// --------------------------------------------------------------
+// Archivo: Publicador.h
+//
+// Descripción:
+// Gestiona la publicación de mediciones mediante Bluetooth LE
+// utilizando anuncios con formato iBeacon.
+//
+// Permite publicar mediciones de CO2 y temperatura.
+// Utiliza el campo Major para identificar el tipo de medición
+// y el contador, y el campo Minor para transmitir el valor.
+//
+// Autor original: Jordi Bataller i Mascarell
+// Adaptación: Soufiane Belfquih El Khalfi
+// Proyecto: Biometría y Medio Ambiente - Sprint 0
+// Aportación: Publicación de mediciones ficticias por BLE.
+//
+// Fecha: 28/09/2026
+// Copyright: Soufiane
+// --------------------------------------------------------------
 
 // --------------------------------------------------------------
 // Jordi Bataller i Mascarell
@@ -6,6 +27,27 @@
 
 #ifndef PUBLICADOR_H_INCLUIDO
 #define PUBLICADOR_H_INCLUIDO
+
+// --------------------------------------------------------------
+// Clase: Publicador
+//
+// Diseño lógico:
+//
+// MedicionesID = { CO2, TEMPERATURA, RUIDO }
+//
+// Tipos de medición:
+// CO2 = 11
+// TEMPERATURA = 12
+// RUIDO = 13
+//
+// Atributos:
+// beaconUUID: [N]_16
+// laEmisora: EmisoraBLE
+// RSSI: Z
+//
+// Gestiona una emisora Bluetooth LE para publicar
+// mediciones utilizando anuncios con formato iBeacon.
+// --------------------------------------------------------------
 
 // --------------------------------------------------------------
 // --------------------------------------------------------------
@@ -35,6 +77,15 @@ public:
   // ............................................................
 public:
 
+  // --------------------------------------------------------------
+  // Enumeración: MedicionesID
+  //
+  // Diseño lógico:
+  // MedicionesID = { CO2, TEMPERATURA, RUIDO }
+  //
+  // Identifica los tipos de medición que puede publicar
+  // el sistema mediante Bluetooth LE.
+  // --------------------------------------------------------------
   // ............................................................
   // ............................................................
   enum MedicionesID  {
@@ -43,6 +94,16 @@ public:
 	RUIDO = 13
   };
 
+  // --------------------------------------------------------------
+  // Constructor: Publicador()
+  //
+  // Diseño lógico:
+  // Publicador()
+  //
+  // Construye el objeto publicador.
+  // La emisora Bluetooth no se enciende en el constructor,
+  // sino posteriormente mediante encenderEmisora().
+  // --------------------------------------------------------------
   // ............................................................
   // ............................................................
   Publicador( ) {
@@ -50,12 +111,35 @@ public:
 	// Pondremos un método para llamarlo desde el setup() más tarde
   } // ()
 
+  // --------------------------------------------------------------
+  // Función: encenderEmisora()
+  //
+  // Diseño lógico:
+  // encenderEmisora()
+  //
+  // Inicializa la emisora Bluetooth LE utilizada
+  // para publicar las mediciones iBeacon.
+  // --------------------------------------------------------------
   // ............................................................
   // ............................................................
   void encenderEmisora() {
 	(*this).laEmisora.encenderEmisora();
   } // ()
 
+  // --------------------------------------------------------------
+  // Función: publicarCO2()
+  //
+  // Diseño lógico:
+  // valorCO2: Z, contador: N, tiempoEspera: N
+  //     --> publicarCO2()
+  //
+  // Construye el campo Major utilizando el identificador
+  // de CO2 y el contador de publicaciones.
+  //
+  // Utiliza el valor de CO2 como campo Minor.
+  // Emite el anuncio, espera el tiempo indicado
+  // y finalmente detiene la emisión Bluetooth.
+  // --------------------------------------------------------------
   // ............................................................
   // ............................................................
   void publicarCO2( int16_t valorCO2, uint8_t contador,
@@ -94,6 +178,22 @@ public:
 Bluefruit.ScanResponse.clearData();
   } // ()
 
+  // --------------------------------------------------------------
+  // Función: publicarTemperatura()
+  //
+  // Diseño lógico:
+  // valorTemperatura: Z, contador: N, tiempoEspera: N
+  //     --> publicarTemperatura()
+  //
+  // Construye el Major combinando el identificador
+  // de temperatura y el contador de publicaciones.
+  //
+  // Utiliza el valor de temperatura como Minor.
+  // Emite el anuncio iBeacon durante el tiempo indicado.
+  //
+  // Finalmente detiene la emisión y limpia
+  // los datos de publicidad Bluetooth.
+  // --------------------------------------------------------------
   // ............................................................
   // ............................................................
   

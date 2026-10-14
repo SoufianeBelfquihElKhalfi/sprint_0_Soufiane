@@ -1,4 +1,26 @@
-// -*- mode: c++ -*-
+
+ // -*- mode: c++ -*-
+
+// --------------------------------------------------------------
+// Archivo: EmisoraBLE.h
+//
+// Descripción:
+// Gestiona las comunicaciones Bluetooth Low Energy mediante
+// la biblioteca Bluefruit.
+//
+// Permite configurar una emisora, publicar anuncios iBeacon,
+// detener la publicidad BLE, añadir servicios y gestionar
+// funciones de conexión y desconexión.
+//
+// Autor original: Jordi Bataller i Mascarell
+// Fecha original: 2019-07-07
+//
+// Integración: Soufiane Belfquih El Khalfi
+// Proyecto: Biometría y Medio Ambiente - Sprint 0
+// Aportación: Integración de la emisión iBeacon del proyecto.
+//
+// Copyright: Soufiane
+// --------------------------------------------------------------
 
 // ----------------------------------------------------------
 // Jordi Bataller i Mascarell
@@ -20,6 +42,23 @@
 // ----------------------------------------------------------
 #include "ServicioEnEmisora.h"
 
+// --------------------------------------------------------------
+// Clase: EmisoraBLE
+//
+// Diseño lógico:
+//
+// EmisoraBLE = (
+//     nombreEmisora: Text,
+//     fabricanteID: N,
+//     txPower: Z
+// )
+//
+// Gestiona la emisión de anuncios y los servicios Bluetooth LE.
+//
+// Utiliza Bluefruit para configurar los datos publicitarios,
+// iniciar y detener anuncios y controlar las conexiones.
+// --------------------------------------------------------------
+
 // ----------------------------------------------------------
 // ----------------------------------------------------------
 class EmisoraBLE {
@@ -31,11 +70,35 @@ private:
 
 public:
 
+  // --------------------------------------------------------------
+  // Tipos de callback.
+  //
+  // CallbackConexionEstablecida:
+  // connHandle: N --> CallbackConexionEstablecida()
+  //
+  // CallbackConexionTerminada:
+  // connHandle: N, reason: N --> CallbackConexionTerminada()
+  //
+  // Representan funciones que se ejecutan cuando
+  // se establece o termina una conexión Bluetooth.
+  // --------------------------------------------------------------
   // .........................................................
   // .........................................................
   using CallbackConexionEstablecida = void ( uint16_t connHandle );
   using CallbackConexionTerminada = void ( uint16_t connHandle, uint8_t reason);
 
+  // --------------------------------------------------------------
+  // Constructor: EmisoraBLE()
+  //
+  // Diseño lógico:
+  // nombreEmisora_: Text, fabricanteID_: N, txPower_: Z
+  //     --> EmisoraBLE()
+  //
+  // Almacena el nombre de la emisora, el identificador
+  // del fabricante y la potencia de transmisión.
+  //
+  // No enciende Bluetooth durante la construcción.
+  // --------------------------------------------------------------
   // .........................................................
   // .........................................................
   EmisoraBLE( const char * nombreEmisora_, const uint16_t fabricanteID_,
@@ -69,7 +132,16 @@ public:
 	instalarCallbackConexionTerminada( cbct );
   } // ()
   */
-	
+
+  // --------------------------------------------------------------
+  // Función: encenderEmisora()
+  //
+  // Diseño lógico:
+  // encenderEmisora()
+  //
+  // Inicializa Bluefruit, detiene posibles anuncios anteriores
+  // y limpia los datos de publicidad BLE.
+  // --------------------------------------------------------------
   // .........................................................
   // .........................................................
   void encenderEmisora() {
@@ -84,6 +156,16 @@ Bluefruit.Advertising.clearData();
 Bluefruit.ScanResponse.clearData();
   } // ()
 
+  // --------------------------------------------------------------
+  // Función: encenderEmisora()
+  //
+  // Diseño lógico:
+  // cbce: CallbackConexionEstablecida,
+  // cbct: CallbackConexionTerminada --> encenderEmisora()
+  //
+  // Inicializa la emisora e instala los callbacks
+  // de conexión y desconexión.
+  // --------------------------------------------------------------
   // .........................................................
   // .........................................................
   void encenderEmisora( CallbackConexionEstablecida cbce,
@@ -96,6 +178,15 @@ Bluefruit.ScanResponse.clearData();
 
   } // ()
 
+  // --------------------------------------------------------------
+  // Función: detenerAnuncio()
+  //
+  // Diseño lógico:
+  // detenerAnuncio()
+  //
+  // Comprueba si existe una emisión activa.
+  // Si está anunciando, detiene la publicidad Bluetooth.
+  // --------------------------------------------------------------
   // .........................................................
   // .........................................................
   void detenerAnuncio() {
@@ -106,7 +197,16 @@ Bluefruit.ScanResponse.clearData();
 	}
 
   }  // ()
-  
+
+  // --------------------------------------------------------------
+  // Función: estaAnunciando()
+  //
+  // Diseño lógico:
+  // estaAnunciando() --> B
+  //
+  // Devuelve true si la emisora está anunciando
+  // datos Bluetooth LE y false en caso contrario.
+  // --------------------------------------------------------------
   // .........................................................
   // estaAnunciando() -> Boleano
   // .........................................................
@@ -114,6 +214,20 @@ Bluefruit.ScanResponse.clearData();
 	return Bluefruit.Advertising.isRunning();
   } // ()
 
+  // --------------------------------------------------------------
+  // Función: emitirAnuncioIBeacon()
+  //
+  // Diseño lógico:
+  // beaconUUID: [N]_16, major: Z, minor: Z, rssi: N
+  //     --> emitirAnuncioIBeacon()
+  //
+  // Detiene los anuncios anteriores y crea un objeto BLEBeacon.
+  //
+  // Configura el fabricante, potencia y nombre de la emisora.
+  // Establece los datos iBeacon y el intervalo de publicidad.
+  //
+  // Inicia el anuncio BLE hasta que se detenga explícitamente.
+  // --------------------------------------------------------------
   // .........................................................
   // .........................................................
   void emitirAnuncioIBeacon( uint8_t * beaconUUID, int16_t major, int16_t minor, uint8_t rssi ) {
@@ -204,6 +318,22 @@ Bluefruit.ScanResponse.clearData();
 
 	const uint8_t tamanyoCarga = strlen( carga );
   */
+
+  // --------------------------------------------------------------
+  // Función: emitirAnuncioIBeaconLibre()
+  //
+  // Diseño lógico:
+  // carga: Text, tamanyoCarga: N
+  //     --> emitirAnuncioIBeaconLibre()
+  //
+  // Permite enviar una carga personalizada dentro
+  // de los datos de fabricante del anuncio BLE.
+  //
+  // Construye un prefijo iBeacon y copia hasta 21 bytes
+  // de la carga recibida.
+  //
+  // Configura los datos publicitarios e inicia la emisión.
+  // --------------------------------------------------------------
   void emitirAnuncioIBeaconLibre( const char * carga, const uint8_t tamanyoCarga ) {
 
 	(*this).detenerAnuncio(); 
@@ -264,6 +394,16 @@ Bluefruit.ScanResponse.clearData();
 	Globales::elPuerto.escribir( "emitiriBeacon libre  Bluefruit.Advertising.start( 0 );  \n");
   } // ()
 
+  // --------------------------------------------------------------
+  // Función: anyadirServicio()
+  //
+  // Diseño lógico:
+  // servicio: ServicioEnEmisora --> anyadirServicio() --> B
+  //
+  // Añade un servicio BLE a los datos de publicidad.
+  // Devuelve true si se añade correctamente y false
+  // si se produce un error.
+  // --------------------------------------------------------------
   // .........................................................
   // .........................................................
   bool anyadirServicio( ServicioEnEmisora & servicio ) {
@@ -282,13 +422,34 @@ Bluefruit.ScanResponse.clearData();
 	 // para addService()
   } // ()
 
-  
+  // --------------------------------------------------------------
+  // Función: anyadirServicioConSusCaracteristicas()
+  //
+  // Diseño lógico:
+  // servicio: ServicioEnEmisora
+  //     --> anyadirServicioConSusCaracteristicas() --> B
+  //
+  // Añade el servicio a los datos publicitarios
+  // utilizando la operación anyadirServicio().
+  // --------------------------------------------------------------
   // .........................................................
   // .........................................................
   bool anyadirServicioConSusCaracteristicas( ServicioEnEmisora & servicio ) { 
 	return (*this).anyadirServicio( servicio );
   } // 
 
+  // --------------------------------------------------------------
+  // Función: anyadirServicioConSusCaracteristicas()
+  //
+  // Diseño lógico:
+  // servicio: ServicioEnEmisora,
+  // caracteristica: Caracteristica,
+  // restoCaracteristicas: [Caracteristica]
+  //     --> anyadirServicioConSusCaracteristicas() --> B
+  //
+  // Añade una característica al servicio y continúa
+  // procesando las restantes mediante una llamada recursiva.
+  // --------------------------------------------------------------
   // .........................................................
   template <typename ... T>
   bool anyadirServicioConSusCaracteristicas( ServicioEnEmisora & servicio,
@@ -301,6 +462,17 @@ Bluefruit.ScanResponse.clearData();
 	
   } // ()
 
+  // --------------------------------------------------------------
+  // Función: anyadirServicioConSusCaracteristicasYActivar()
+  //
+  // Diseño lógico:
+  // servicio: ServicioEnEmisora,
+  // restoCaracteristicas: [Caracteristica]
+  //     --> anyadirServicioConSusCaracteristicasYActivar() --> B
+  //
+  // Añade las características al servicio BLE,
+  // activa el servicio y devuelve el resultado.
+  // --------------------------------------------------------------
   // .........................................................
   template <typename ... T>
   bool anyadirServicioConSusCaracteristicasYActivar( ServicioEnEmisora & servicio,
@@ -315,18 +487,47 @@ Bluefruit.ScanResponse.clearData();
 	
   } // ()
 
+  // --------------------------------------------------------------
+  // Función: instalarCallbackConexionEstablecida()
+  //
+  // Diseño lógico:
+  // cb: CallbackConexionEstablecida
+  //     --> instalarCallbackConexionEstablecida()
+  //
+  // Registra la función que se ejecutará cuando
+  // se establezca una conexión Bluetooth.
+  // --------------------------------------------------------------
   // .........................................................
   // .........................................................
   void instalarCallbackConexionEstablecida( CallbackConexionEstablecida cb ) {
 	Bluefruit.Periph.setConnectCallback( cb );
   } // ()
 
+  // --------------------------------------------------------------
+  // Función: instalarCallbackConexionTerminada()
+  //
+  // Diseño lógico:
+  // cb: CallbackConexionTerminada
+  //     --> instalarCallbackConexionTerminada()
+  //
+  // Registra la función que se ejecutará cuando
+  // termine una conexión Bluetooth.
+  // --------------------------------------------------------------
   // .........................................................
   // .........................................................
   void instalarCallbackConexionTerminada( CallbackConexionTerminada cb ) {
 	Bluefruit.Periph.setDisconnectCallback( cb );
   } // ()
 
+  // --------------------------------------------------------------
+  // Función: getConexion()
+  //
+  // Diseño lógico:
+  // connHandle: N --> getConexion() --> BLEConnection*
+  //
+  // Devuelve un puntero a la conexión Bluetooth
+  // correspondiente al identificador recibido.
+  // --------------------------------------------------------------
   // .........................................................
   // .........................................................
   BLEConnection * getConexion( uint16_t connHandle ) {
@@ -341,4 +542,3 @@ Bluefruit.ScanResponse.clearData();
 // ----------------------------------------------------------
 // ----------------------------------------------------------
 // ----------------------------------------------------------
-

@@ -2,6 +2,26 @@
  // -*-c++-*-
 
 // --------------------------------------------------------------
+// Archivo: HolaMundoIBeacon.ino
+//
+// Descripción:
+// Programa principal de la placa Arduino para el proyecto
+// de Biometría y Medio Ambiente.
+//
+// Inicializa los componentes y publica una medición ficticia
+// mediante anuncios Bluetooth LE con formato iBeacon.
+//
+// La publicación se realiza cada 30 segundos.
+//
+// Autor original: Jordi Bataller i Mascarell
+// Fecha original: 2019-07-07
+//
+// Adaptación: Soufiane Belfquih El Khalfi
+// Proyecto: Biometría y Medio Ambiente - Sprint 0
+// Aportación: Publicación periódica de una medición ficticia.
+//
+// Copyright: pendiente de verificar.
+// --------------------------------------------------------------
 // Jordi Bataller i Mascarell
 // 2019-07-07
 // --------------------------------------------------------------
@@ -15,7 +35,10 @@
 #include "PuertoSerie.h"
 
 // --------------------------------------------------------------
-// Variables globales
+// Variables globales.
+//
+// Se crean los objetos utilizados para controlar el LED
+// y la comunicación mediante el puerto serie.
 // --------------------------------------------------------------
 namespace Globales {
 
@@ -29,6 +52,10 @@ namespace Globales {
 #include "Publicador.h"
 #include "Medidor.h"
 
+// --------------------------------------------------------------
+// Objetos globales para la publicación BLE
+// y la obtención de mediciones.
+// --------------------------------------------------------------
 namespace Globales {
 
   Publicador elPublicador;
@@ -43,7 +70,13 @@ namespace Globales {
 const unsigned long INTERVALO_PUBLICACION_MS = 30000;
 
 // --------------------------------------------------------------
-// Inicializar placa
+// Función: inicializarPlaquita()
+//
+// Diseño lógico:
+// inicializarPlaquita()
+//
+// Función reservada para la inicialización específica
+// de la placa. Actualmente no realiza ninguna operación.
 // --------------------------------------------------------------
 void inicializarPlaquita() {
 
@@ -52,7 +85,16 @@ void inicializarPlaquita() {
 }
 
 // --------------------------------------------------------------
+// Función: setup()
+//
+// Diseño lógico:
 // setup()
+//
+// Inicializa la placa, enciende la emisora Bluetooth LE
+// e inicializa el medidor.
+//
+// Realiza una espera inicial y comunica mediante
+// el puerto serie que ha terminado la configuración.
 // --------------------------------------------------------------
 void setup() {
 
@@ -69,7 +111,16 @@ void setup() {
 }
 
 // --------------------------------------------------------------
-// LED de funcionamiento
+// Función: lucecitas()
+//
+// Diseño lógico:
+// lucecitas()
+//
+// Controla una secuencia de iluminación del LED
+// para indicar el funcionamiento de la placa.
+//
+// La secuencia contiene varias activaciones del LED
+// y pausas entre ellas.
 // --------------------------------------------------------------
 inline void lucecitas() {
 
@@ -90,7 +141,11 @@ inline void lucecitas() {
 }
 
 // --------------------------------------------------------------
-// Contador
+// Contador de rondas de publicación.
+//
+// Se incrementa en cada ejecución de loop().
+// El contador también se utiliza para identificar
+// las sucesivas publicaciones Bluetooth.
 // --------------------------------------------------------------
 namespace Loop {
 
@@ -99,8 +154,22 @@ namespace Loop {
 };
 
 // --------------------------------------------------------------
+// Función: loop()
+//
+// Diseño lógico:
 // loop()
-// Publica las mediciones cada 30 segundos indefinidamente.
+//
+// Ejecuta periódicamente una ronda de publicación.
+//
+// 1. Registra el instante inicial de la ronda.
+// 2. Incrementa el contador de publicaciones.
+// 3. Ejecuta la secuencia de iluminación del LED.
+// 4. Publica una medición ficticia de temperatura.
+// 5. Detiene el anuncio Bluetooth.
+// 6. Registra el final de la ronda por el puerto serie.
+// 7. Espera el tiempo restante hasta completar 30 segundos.
+//
+// La función se ejecuta indefinidamente.
 // --------------------------------------------------------------
 void loop() {
 
@@ -137,7 +206,7 @@ uint16_t major = (12 << 8) | cont;
   // ------------------------------------------------------------
   // Publicar temperatura (valor de prueba: 1234)
   // ------------------------------------------------------------
-  int valorTemperatura = 3333;
+  int valorTemperatura = 4321;
 
   elPublicador.publicarTemperatura(
       valorTemperatura,
