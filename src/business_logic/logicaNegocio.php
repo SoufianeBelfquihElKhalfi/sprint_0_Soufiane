@@ -1,11 +1,36 @@
+
 <?php
 declare(strict_types=1);
+
+// --------------------------------------------------------------
+// Archivo: logicaNegocio.php
+//
+// Descripción:
+// Gestiona el almacenamiento y la recuperación de mediciones
+// mediante una conexión a la base de datos.
+//
+// Autor: Soufiane Belfquih El Khalfi
+// Proyecto: Biometría y Medio Ambiente - Sprint 0
+// Aportación: Implementación de la lógica de negocio.
+// 
+// 
+// Fecha: 30/09/2026
+// Copyright: soufiane
+// --------------------------------------------------------------
 
 class LogicaNegocio
 {
     private PDO $conexion;
 
-    // Recibe la conexión preparada fuera de esta clase.
+    // --------------------------------------------------------------
+    // Constructor: LogicaNegocio()
+    //
+    // Diseño lógico:
+    // conexion: ConexionBD --> LogicaNegocio()
+    //
+    // Recibe una conexión a la base de datos, la almacena
+    // y configura el tratamiento de errores.
+    // --------------------------------------------------------------
     public function __construct(PDO $conexion)
     {
         $this->conexion = $conexion;
@@ -15,7 +40,16 @@ class LogicaNegocio
         );
     }
 
-    // Guarda la medición y devuelve el ID generado.
+    // --------------------------------------------------------------
+    // Función: guardarMedicion()
+    //
+    // Diseño lógico:
+    // fecha: Text, tipo: Text, valor: R
+    //     --> guardarMedicion() --> Text
+    //
+    // Comprueba que el valor sea finito, guarda la medición
+    // en la base de datos y devuelve el ID generado.
+    // --------------------------------------------------------------
     public function guardarMedicion(
         DateTimeInterface $fecha,
         string $tipo,
@@ -41,7 +75,15 @@ class LogicaNegocio
         return $this->conexion->lastInsertId();
     }
 
-    // Recupera la última medición.
+    // --------------------------------------------------------------
+    // Función: recuperarMedicion()
+    //
+    // Diseño lógico:
+    // recuperarMedicion() --> Medicion ∪ {null}
+    //
+    // Consulta las mediciones ordenadas por ID descendente
+    // y devuelve la última o null si no existen registros.
+    // --------------------------------------------------------------
     public function recuperarMedicion(): ?array
     {
         $consulta = $this->conexion->query(
