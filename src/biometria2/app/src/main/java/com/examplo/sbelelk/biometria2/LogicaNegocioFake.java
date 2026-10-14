@@ -14,8 +14,28 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 // --------------------------------------------------------------
-// Lógica fake de la aplicación Android.
-// Se comunica con el servidor REST mediante HTTP.
+// Archivo: LogicaNegocioFake.java
+//
+// Descripción:
+// Implementa la lógica de negocio fake de la aplicación Android.
+// Gestiona el envío y la recuperación de mediciones mediante
+// peticiones HTTP a la API REST del servidor.
+//
+// Autor: Soufiane Belfquih El Khalfi
+// Proyecto: Biometría y Medio Ambiente - Sprint 0
+// Aportación: Comunicación entre Android y el servidor REST.
+//
+// Fecha: 03/10/2026
+// Copyright (c) 2026 Soufiane Belfquih El Khalfi
+// --------------------------------------------------------------
+
+// --------------------------------------------------------------
+// Clase: LogicaNegocioFake
+//
+// Encapsula las operaciones de comunicación con el servidor.
+// Permite guardar mediciones mediante POST y recuperarlas
+// mediante GET, sin realizar estas peticiones directamente
+// desde la interfaz gráfica.
 // --------------------------------------------------------------
 public class LogicaNegocioFake {
 
@@ -25,7 +45,13 @@ public class LogicaNegocioFake {
             "https://sbelelk.upv.edu.es/communication/servidor.php?ruta=";
 
     // --------------------------------------------------------------
-    // Permite devolver la medición recuperada a MainActivity.
+    // Interfaz: ResultadoMedicion
+    //
+    // Diseño lógico:
+    // medicion: Medicion, error: Text --> alRecuperar()
+    //
+    // Permite comunicar el resultado de una consulta REST
+    // a la actividad principal de Android.
     // --------------------------------------------------------------
     public interface ResultadoMedicion {
 
@@ -34,7 +60,17 @@ public class LogicaNegocioFake {
     }
 
     // --------------------------------------------------------------
-    // Envía una medición al servidor mediante POST.
+    // Función: guardarMedicion()
+    //
+    // Diseño lógico:
+    // medicion: Medicion --> guardarMedicion()
+    //
+    // Recibe una medición y la convierte a formato JSON.
+    // Realiza una petición HTTP POST al servidor REST.
+    // Registra la respuesta recibida o los posibles errores.
+    //
+    // La operación se ejecuta en un hilo secundario para
+    // no bloquear la interfaz de Android.
     // --------------------------------------------------------------
     public void guardarMedicion(Medicion medicion) {
 
@@ -111,7 +147,13 @@ public class LogicaNegocioFake {
     }
 
     // --------------------------------------------------------------
-    // Recupera la última medición sin actualizar la interfaz.
+    // Función: recuperarMedicion()
+    //
+    // Diseño lógico:
+    // recuperarMedicion()
+    //
+    // Solicita la recuperación de la última medición
+    // sin proporcionar una función que reciba el resultado.
     // --------------------------------------------------------------
     public void recuperarMedicion() {
 
@@ -120,8 +162,18 @@ public class LogicaNegocioFake {
     }
 
     // --------------------------------------------------------------
-    // Recupera la última medición del servidor mediante GET.
-    // Devuelve el resultado a MainActivity.
+    // Función: recuperarMedicion()
+    //
+    // Diseño lógico:
+    // recuperarMedicion() --> Medicion ∪ {null}
+    //
+    // Realiza una petición HTTP GET para recuperar
+    // la última medición almacenada en el servidor.
+    //
+    // Convierte la respuesta JSON en un objeto Medicion.
+    // Comunica el resultado o el error mediante el callback.
+    //
+    // La operación se ejecuta en un hilo secundario.
     // --------------------------------------------------------------
     public void recuperarMedicion(ResultadoMedicion callback) {
 
@@ -223,7 +275,15 @@ public class LogicaNegocioFake {
     }
 
     // --------------------------------------------------------------
-    // Lee la respuesta HTTP del servidor.
+    // Función: leerRespuesta()
+    //
+    // Diseño lógico:
+    // conexion: ConexionHTTP, codigo: N
+    //     --> leerRespuesta() --> Text
+    //
+    // Lee el contenido de la respuesta HTTP recibida.
+    // Selecciona el flujo de entrada o de error según
+    // el código de estado y devuelve el contenido como texto.
     // --------------------------------------------------------------
     private String leerRespuesta(
             HttpURLConnection conexion,

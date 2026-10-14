@@ -1,14 +1,57 @@
+
 package com.examplo.sbelelk.biometria2;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
+// --------------------------------------------------------------
+// Archivo: Utilidades.java
+//
+// Descripción:
+// Contiene funciones auxiliares para convertir datos entre
+// cadenas de texto, UUID, arrays de bytes y números.
+//
+// Estas funciones permiten interpretar y transformar
+// la información utilizada en las comunicaciones Bluetooth.
+//
+// Autor original: Jordi Bataller i Mascarell
+// Integración en el proyecto: Soufiane Belfquih El Khalfi
+// Proyecto: Biometría y Medio Ambiente - Sprint 0
+// Aportación: Integración de utilidades para datos Bluetooth.
+//
+// Fecha original: 03/10/2026
+// Copyright: Soufiane
+// --------------------------------------------------------------
+
+// --------------------------------------------------------------
+// Clase: Utilidades
+//
+// Contiene funciones estáticas para la conversión de datos.
+//
+// Tipos lógicos:
+// N: números naturales.
+// Z: números enteros.
+// Text: cadenas de texto.
+// [N]: colección de bytes.
+// UUID: identificador de 128 bits.
+//
+// Las funciones no necesitan crear un objeto Utilidades.
+// --------------------------------------------------------------
+
 // -----------------------------------------------------------------------------------
 // @author: Jordi Bataller i Mascarell
 // -----------------------------------------------------------------------------------
 public class Utilidades {
 
+    // --------------------------------------------------------------
+    // Función: stringToBytes()
+    //
+    // Diseño lógico:
+    // texto: Text --> stringToBytes() --> [N]
+    //
+    // Convierte una cadena de texto en un array de bytes.
+    // --------------------------------------------------------------
     // -------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------
     public static byte[] stringToBytes ( String texto ) {
@@ -16,6 +59,17 @@ public class Utilidades {
         // byte[] b = string.getBytes(StandardCharsets.UTF_8); // Ja
     } // ()
 
+    // --------------------------------------------------------------
+    // Función: stringToUUID()
+    //
+    // Diseño lógico:
+    // uuid: Text --> stringToUUID() --> UUID
+    //
+    // Recibe una cadena de 16 caracteres y la convierte
+    // en un identificador UUID.
+    //
+    // Si la cadena no tiene 16 caracteres, genera un error.
+    // --------------------------------------------------------------
     // -------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------
     public static UUID stringToUUID( String uuid ) {
@@ -35,18 +89,45 @@ public class Utilidades {
         return res;
     } // ()
 
+    // --------------------------------------------------------------
+    // Función: uuidToString()
+    //
+    // Diseño lógico:
+    // uuid: UUID --> uuidToString() --> Text
+    //
+    // Convierte un UUID en una cadena de texto mediante
+    // la representación de sus 16 bytes.
+    // --------------------------------------------------------------
     // -------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------
     public static String uuidToString ( UUID uuid ) {
         return bytesToString( dosLongToBytes( uuid.getMostSignificantBits(), uuid.getLeastSignificantBits() ) );
     } // ()
 
+    // --------------------------------------------------------------
+    // Función: uuidToHexString()
+    //
+    // Diseño lógico:
+    // uuid: UUID --> uuidToHexString() --> Text
+    //
+    // Convierte un UUID en una representación hexadecimal
+    // de sus bytes.
+    // --------------------------------------------------------------
     // -------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------
     public static String uuidToHexString ( UUID uuid ) {
         return bytesToHexString( dosLongToBytes( uuid.getMostSignificantBits(), uuid.getLeastSignificantBits() ) );
     } // ()
 
+    // --------------------------------------------------------------
+    // Función: bytesToString()
+    //
+    // Diseño lógico:
+    // bytes: [N] --> bytesToString() --> Text
+    //
+    // Convierte un array de bytes en una cadena de caracteres.
+    // Si recibe null, devuelve una cadena vacía.
+    // --------------------------------------------------------------
     // -------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------
     public static String bytesToString( byte[] bytes ) {
@@ -61,6 +142,16 @@ public class Utilidades {
         return sb.toString();
     }
 
+    // --------------------------------------------------------------
+    // Función: dosLongToBytes()
+    //
+    // Diseño lógico:
+    // masSignificativos: Z, menosSignificativos: Z
+    //     --> dosLongToBytes() --> [N]_16
+    //
+    // Convierte dos números enteros de 64 bits
+    // en un array de 16 bytes.
+    // --------------------------------------------------------------
     // -------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------
     public static byte[] dosLongToBytes( long masSignificativos, long menosSignificativos ) {
@@ -70,18 +161,47 @@ public class Utilidades {
         return buffer.array();
     }
 
+    // --------------------------------------------------------------
+    // Función: bytesToInt()
+    //
+    // Diseño lógico:
+    // bytes: [N] --> bytesToInt() --> Z
+    //
+    // Convierte un array de bytes en un número entero
+    // utilizando BigInteger.
+    // --------------------------------------------------------------
     // -------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------
     public static int bytesToInt( byte[] bytes ) {
         return new BigInteger(bytes).intValue();
     }
 
+    // --------------------------------------------------------------
+    // Función: bytesToLong()
+    //
+    // Diseño lógico:
+    // bytes: [N] --> bytesToLong() --> Z
+    //
+    // Convierte un array de bytes en un número entero
+    // de 64 bits utilizando BigInteger.
+    // --------------------------------------------------------------
     // -------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------
     public static long bytesToLong( byte[] bytes ) {
         return new BigInteger(bytes).longValue();
     }
 
+    // --------------------------------------------------------------
+    // Función: bytesToIntOK()
+    //
+    // Diseño lógico:
+    // bytes: [N] --> bytesToIntOK() --> Z
+    //
+    // Convierte hasta cuatro bytes en un número entero.
+    //
+    // Si recibe null, devuelve cero.
+    // Si recibe más de cuatro bytes, genera un error.
+    // --------------------------------------------------------------
     // -------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------
     public static int bytesToIntOK( byte[] bytes ) {
@@ -120,6 +240,17 @@ public class Utilidades {
         return res;
     } // ()
 
+    // --------------------------------------------------------------
+    // Función: bytesToHexString()
+    //
+    // Diseño lógico:
+    // bytes: [N] --> bytesToHexString() --> Text
+    //
+    // Convierte un array de bytes en una cadena hexadecimal
+    // separando sus valores mediante dos puntos.
+    //
+    // Si recibe null, devuelve una cadena vacía.
+    // --------------------------------------------------------------
     // -------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------
     public static String bytesToHexString( byte[] bytes ) {
@@ -140,4 +271,3 @@ public class Utilidades {
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-

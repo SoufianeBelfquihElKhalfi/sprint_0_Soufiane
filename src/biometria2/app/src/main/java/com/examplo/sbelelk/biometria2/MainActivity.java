@@ -28,6 +28,26 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
+
+    // --------------------------------------------------------------
+    // Archivo: MainActivity.java
+    //
+    // Descripción:
+    // Actividad principal de la aplicación Android del proyecto
+    // de Biometría y Medio Ambiente.
+    //
+    // Gestiona la búsqueda de dispositivos Bluetooth LE,
+    // la recepción de tramas iBeacon y la obtención de
+    // mediciones mediante la lógica de negocio fake.
+    //
+    // Autor: Soufiane Belfquih El Khalfi
+    // Proyecto: Biometría y Medio Ambiente - Sprint 0
+    // Aportación: Interfaz Android y recepción de mediciones BLE.
+    //
+    // Fecha: 03/10/2026
+    // Copyright (c) 2026 Soufiane Belfquih El Khalfi
+    // --------------------------------------------------------------
+
     private static final String ETIQUETA_LOG = ">>>>";
     private static final int CODIGO_PERMISO_UBICACION = 100;
     private static final int CODIGO_PERMISOS_BLUETOOTH = 101;
@@ -64,6 +84,17 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    // --------------------------------------------------------------
+    // Función: onCreate()
+    //
+    // Diseño lógico:
+    // savedInstanceState: EstadoActividad --> onCreate()
+    //
+    // Inicializa la actividad, configura la interfaz,
+    // prepara Bluetooth y crea la lógica de negocio fake.
+    // Obtiene las referencias a los elementos de la pantalla.
+    // --------------------------------------------------------------
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +129,17 @@ public class MainActivity extends AppCompatActivity {
 
 
     // --------------------------------------------------------------
+    // Función: inicializarBlueTooth()
+    //
+    // Diseño lógico:
+    // inicializarBlueTooth()
+    //
+    // Obtiene el adaptador Bluetooth del dispositivo.
+    // Comprueba si Bluetooth está disponible y registra
+    // su estado actual en Logcat.
+    // --------------------------------------------------------------
+
+    // --------------------------------------------------------------
     // Inicializa Bluetooth sin utilizar permisos incompatibles.
     // --------------------------------------------------------------
     private void inicializarBlueTooth() {
@@ -125,6 +167,23 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------
     // Comprueba los permisos necesarios para buscar dispositivos.
     // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: comprobarPermisos()
+    //
+    // Diseño lógico:
+    // comprobarPermisos() --> B
+    //
+    // Comprueba los permisos necesarios para utilizar BLE.
+    // En Android 12 o superior comprueba los permisos
+    // de Bluetooth.
+    // En versiones anteriores comprueba la ubicación.
+    //
+    // Devuelve true si los permisos están concedidos.
+    // Si faltan permisos, los solicita y devuelve false.
+    // --------------------------------------------------------------
+
     private boolean comprobarPermisos() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -184,6 +243,24 @@ public class MainActivity extends AppCompatActivity {
 
         return true;
     }
+
+
+    // --------------------------------------------------------------
+    // Función: prepararEscaneo()
+    //
+    // Diseño lógico:
+    // nombre: Text ∪ {null} --> prepararEscaneo()
+    //
+    // Prepara una búsqueda de dispositivos Bluetooth LE.
+    // Comprueba permisos, disponibilidad y activación
+    // de Bluetooth.
+    //
+    // En versiones anteriores a Android 12, también
+    // comprueba que la ubicación esté activada.
+    //
+    // Si se cumplen las condiciones, inicia el escaneo.
+    // --------------------------------------------------------------
+
 
     // --------------------------------------------------------------
     // Prepara el escaneo y comprueba Bluetooth y ubicación.
@@ -261,9 +338,29 @@ public class MainActivity extends AppCompatActivity {
         iniciarEscaneo();
     }
 
+
+
     // --------------------------------------------------------------
     // Inicia el escaneo BLE.
     // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: iniciarEscaneo()
+    //
+    // Diseño lógico:
+    // iniciarEscaneo()
+    //
+    // Detiene cualquier búsqueda anterior.
+    // Obtiene el escáner Bluetooth LE y configura
+    // las funciones de recepción de resultados.
+    //
+    // Si existe un nombre seleccionado, aplica un filtro
+    // para buscar únicamente ese dispositivo.
+    //
+    // Inicia la búsqueda y registra los posibles errores.
+    // --------------------------------------------------------------
+
     private void iniciarEscaneo() {
 
         // Detiene una búsqueda anterior.
@@ -373,6 +470,21 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------
     // Muestra los datos del dispositivo detectado.
     // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: mostrarInformacionDispositivoBTLE()
+    //
+    // Diseño lógico:
+    // resultado: ScanResult --> mostrarInformacionDispositivoBTLE()
+    //
+    // Obtiene la información de un dispositivo detectado.
+    // Registra su nombre, dirección y potencia de señal.
+    //
+    // Si contiene datos de anuncio BLE, obtiene sus bytes
+    // y solicita la interpretación de la trama iBeacon.
+    // --------------------------------------------------------------
+
     private void mostrarInformacionDispositivoBTLE(
             ScanResult resultado
     ) {
@@ -443,6 +555,25 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------
     // NUEVO: busca una trama iBeacon y muestra sus datos.
     // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: mostrarDatosIBeacon()
+    //
+    // Diseño lógico:
+    // bytes: [N] --> mostrarDatosIBeacon()
+    //
+    // Recorre los datos del anuncio Bluetooth LE.
+    // Comprueba si contienen una trama iBeacon válida.
+    //
+    // Extrae el UUID, Major, Minor y TxPower.
+    // Comprueba que el UUID corresponde al proyecto.
+    //
+    // Controla el intervalo mínimo entre envíos.
+    // Crea una medición utilizando el valor Minor.
+    // Envía la medición a través de LogicaNegocioFake.
+    // --------------------------------------------------------------
+
 
     private void mostrarDatosIBeacon(byte[] bytes) {
 
@@ -615,6 +746,18 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------
     // Botón 1: buscar todos los dispositivos BLE.
     // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: botonBuscarDispositivosBTLEPulsado()
+    //
+    // Diseño lógico:
+    // botonBuscarDispositivosBTLEPulsado()
+    //
+    // Inicia la búsqueda de todos los dispositivos BLE
+    // disponibles sin aplicar un filtro por nombre.
+    // --------------------------------------------------------------
+
     public void botonBuscarDispositivosBTLEPulsado(View v) {
 
         Log.d(ETIQUETA_LOG,
@@ -626,6 +769,17 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------
     // Botón 2: detener el escaneo BLE.
     // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: botonDetenerBusquedaDispositivosBTLEPulsado()
+    //
+    // Diseño lógico:
+    // botonDetenerBusquedaDispositivosBTLEPulsado()
+    //
+    // Solicita la detención del escaneo Bluetooth LE.
+    // --------------------------------------------------------------
+
     public void botonDetenerBusquedaDispositivosBTLEPulsado(
             View v
     ) {
@@ -639,6 +793,18 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------
     // Botón 3: buscar nuestro dispositivo BLE.
     // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: botonBuscarNuestroDispositivoBTLEPulsado()
+    //
+    // Diseño lógico:
+    // botonBuscarNuestroDispositivoBTLEPulsado()
+    //
+    // Inicia un escaneo BLE filtrado por el nombre
+    // del dispositivo del proyecto: GTI-Soufiane.
+    // --------------------------------------------------------------
+
     public void botonBuscarNuestroDispositivoBTLEPulsado(
             View v
     ) {
@@ -652,6 +818,19 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------
     // Detiene la búsqueda de dispositivos BLE.
     // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: detenerBusquedaDispositivosBTLE()
+    //
+    // Diseño lógico:
+    // detenerBusquedaDispositivosBTLE()
+    //
+    // Detiene el escaneo BLE activo.
+    // Libera la referencia al callback y actualiza
+    // el estado de la búsqueda.
+    // --------------------------------------------------------------
+
     private void detenerBusquedaDispositivosBTLE() {
 
         if (elEscanner == null ||
@@ -682,6 +861,20 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------
     // Recibe los resultados de los permisos solicitados.
     // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: onRequestPermissionsResult()
+    //
+    // Diseño lógico:
+    // requestCode: Z, permissions: [Text],
+    // grantResults: [Z] --> onRequestPermissionsResult()
+    //
+    // Recibe los resultados de los permisos solicitados.
+    // Si todos los permisos requeridos fueron concedidos,
+    // vuelve a preparar el escaneo BLE.
+    // --------------------------------------------------------------
+
     @Override
     public void onRequestPermissionsResult(
             int requestCode,
@@ -725,6 +918,22 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------
     // Resultado de la solicitud para activar Bluetooth.
     // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: onActivityResult()
+    //
+    // Diseño lógico:
+    // requestCode: Z, resultCode: Z, data: Intent ∪ {null}
+    //     --> onActivityResult()
+    //
+    // Procesa el resultado de la solicitud de activación
+    // de Bluetooth.
+    //
+    // Si el usuario lo activa, prepara nuevamente
+    // la búsqueda de dispositivos.
+    // --------------------------------------------------------------
+
     @Override
     protected void onActivityResult(
             int requestCode,
@@ -758,6 +967,18 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------
     // Detiene el escaneo al cerrar la actividad.
     // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: onDestroy()
+    //
+    // Diseño lógico:
+    // onDestroy()
+    //
+    // Detiene el escaneo Bluetooth antes de finalizar
+    // la actividad y ejecuta el cierre correspondiente.
+    // --------------------------------------------------------------
+
     @Override
     protected void onDestroy() {
 
@@ -770,6 +991,26 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------
 // Botón 4: recuperar la última medición del servidor.
 // --------------------------------------------------------------
+
+
+    // --------------------------------------------------------------
+    // Función: botonActualizarMedicionPulsado()
+    //
+    // Diseño lógico:
+    // botonActualizarMedicionPulsado()
+    //
+    // Solicita la última medición almacenada mediante
+    // la lógica de negocio fake.
+    //
+    // Recibe la respuesta del servidor y actualiza
+    // los elementos de la interfaz desde el hilo principal.
+    //
+    // Muestra el identificador, la fecha, el tipo
+    // y el valor de la medición.
+    //
+    // Si ocurre un error, informa al usuario.
+    // --------------------------------------------------------------
+
     public void botonActualizarMedicionPulsado(View v) {
 
         Log.d(ETIQUETA_LOG,
