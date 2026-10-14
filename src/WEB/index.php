@@ -1,3 +1,26 @@
+
+<!--
+--------------------------------------------------------------
+Archivo: index.php
+
+Descripción:
+Interfaz web del proyecto de Biometría y Medio Ambiente.
+
+Muestra la última medición almacenada en la base de datos,
+incluyendo su identificador, tipo y valor.
+
+Permite actualizar los datos mediante un botón y utiliza
+la lógica de negocio fake para comunicarse con el servidor.
+
+Autor: Soufiane Belfquih El Khalfi
+Proyecto: Biometría y Medio Ambiente - Sprint 0
+Aportación: Implementación de la interfaz web.
+
+Fecha: pendiente de comprobar en el historial original.
+Copyright (c) 2026 Soufiane Belfquih El Khalfi
+--------------------------------------------------------------
+-->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -75,6 +98,14 @@
     </style>
 </head>
 <body>
+    <!--
+    --------------------------------------------------------------
+    Estructura de la interfaz gráfica.
+
+    Contiene el encabezado, los datos de la última medición
+    y el botón para actualizar la información.
+    --------------------------------------------------------------
+    -->
     <header aria-label="Biometría y Medio Ambiente"></header>
 
     <main>
@@ -95,12 +126,36 @@
         <p id="mensaje" role="status" hidden></p>
     </main>
 
+    <!--
+    --------------------------------------------------------------
+    Carga de la lógica de negocio fake.
+
+    La interfaz utiliza LogicaNegocioFakeWEB para consultar
+    el servidor sin implementar directamente las peticiones HTTP.
+    --------------------------------------------------------------
+    -->
     <script src="/frontend_business_logic/logicaNegocioFakeWEB.js"></script>
     <script>
         const logica = new LogicaNegocioFakeWEB();
         const boton = document.getElementById('obtener');
         const mensaje = document.getElementById('mensaje');
 
+        // --------------------------------------------------------------
+        // Función: actualizarMedicion()
+        //
+        // Diseño lógico:
+        // actualizarMedicion()
+        //
+        // Solicita la última medición mediante la lógica fake.
+        //
+        // Si la operación es correcta, actualiza el identificador,
+        // el tipo y el valor mostrados en la interfaz.
+        //
+        // Si se produce un error, muestra un mensaje al usuario.
+        //
+        // Desactiva temporalmente el botón mientras se realiza
+        // la consulta y lo reactiva al finalizar.
+        // --------------------------------------------------------------
         // La interfaz delega la comunicación en la lógica fake.
         async function actualizarMedicion() {
             boton.disabled = true;
@@ -120,6 +175,9 @@
             }
         }
 
+        // --------------------------------------------------------------
+        // Asociar el botón con la función actualizarMedicion().
+        // --------------------------------------------------------------
         boton.addEventListener('click', actualizarMedicion);
 
         // Obtiene la última medición al abrir la página.
