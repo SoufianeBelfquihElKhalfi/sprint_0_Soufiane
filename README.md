@@ -1,3 +1,4 @@
+
 # Sprint 0 — Biometría y Medio Ambiente
 
 ## 1. Descripción del proyecto
@@ -96,6 +97,14 @@ Sprint 0
 |   |-- communication_design.md
 |   |-- database_design.md
 |   |-- frontend_business_logic_design.md
+|   |-- prompts_iniciales.pdf
+|   |-- uso_ia.md
+|
+|-- tests/
+|   |-- index.php
+|   |-- test_rest.php
+|   |-- test_validaciones.php
+|   |-- test_integracion.php
 |
 |-- src/
     |
@@ -111,6 +120,10 @@ Sprint 0
     |
     |-- biometria2/
     |   |-- app/
+    |   |   |-- src/
+    |   |       |-- main/
+    |   |       |-- test/
+    |   |       |-- androidTest/
     |   |-- build.gradle
     |   |-- settings.gradle
     |
@@ -317,24 +330,60 @@ Las credenciales de producción no deben publicarse en el repositorio.
 
 ## 12. Pruebas
 
-El proyecto incluye un archivo PHP de pruebas:
+El proyecto incorpora pruebas unitarias de Java, pruebas instrumentadas de Android, pruebas de lógica de negocio en PHP y pruebas de la API REST. También se han realizado comprobaciones manuales de la placa BLE y del funcionamiento integrado del sistema.
 
-`src/business_logic/prueba.php`
+### 12.1. Pruebas PHP y REST
 
-Este archivo comprueba mediante peticiones HTTP el almacenamiento y la recuperación de una medición.
+| Archivo | Qué comprueba |
+|---|---|
+| `tests/index.php` | PHP, conexión a MySQL, recuperación y estructura de mediciones; operaciones de guardar y recuperar mediante una base de datos SQLite temporal en memoria. |
+| `tests/test_rest.php` | Códigos HTTP y métodos admitidos en las rutas REST. |
+| `tests/test_validaciones.php` | Rechazo de JSON inválido, campos ausentes, fechas incorrectas y valores no numéricos. |
+| `tests/test_integracion.php` | Recorrido POST → MySQL → GET, identificador y valores guardados y recuperados. |
+| `src/business_logic/prueba.php` | Prueba HTTP previa de guardar y recuperar, preparada para un servidor local de desarrollo. |
 
-Entre las comprobaciones implementadas están:
+Para ejecutar las pruebas desde Plesk se colocan los archivos de `tests/` en `httpdocs/tests/`. Las pruebas de lectura pueden consultarse en `/tests/`, `/tests/test_rest.php` y `/tests/test_validaciones.php` cuando el servidor dispone de PHP, cURL y los controladores PDO necesarios.
 
-- Respuesta HTTP `201` al guardar una medición.
-- Devolución de un identificador.
-- Respuesta HTTP `200` al recuperar una medición.
-- Presencia de los campos obligatorios.
-- Ausencia de los campos adicionales `major` y `minor`.
-- Coincidencia entre la medición guardada y la recuperada.
+`tests/index.php` consulta la base de datos MySQL configurada y realiza pruebas de escritura adicionales sobre SQLite en memoria, sin modificar MySQL en esas comprobaciones.
 
-Estas comprobaciones están implementadas, pero su ejecución y los resultados deberán verificarse en la fase de pruebas.
+**Precaución:** `test_integracion.php` contiene la constante `EJECUTAR_PRUEBA`, desactivada inicialmente. Activarla implica insertar una medición real en MySQL. Debe ejecutarse solo de forma controlada y desactivarse al terminar. Por seguridad, los scripts de prueba no deberían permanecer accesibles públicamente en el servidor de producción.
 
+### 12.2. Pruebas unitarias de Android (Java)
 
+Se encuentran en `src/biometria2/app/src/test/java/com/examplo/sbelelk/biometria2/`:
+
+- `TramaIBeaconTest.java`: siete pruebas de extracción de la trama, UUID, Major, Minor `4321`, potencia, fabricante y estructura iBeacon.
+- `MedicionTest.java`: siete pruebas sobre los constructores, identificador, fecha, tipo y valores numéricos de las mediciones.
+
+Se ejecutan en Android Studio mediante **Run** sobre cada clase de test; no necesitan un teléfono ni una conexión BLE. Comprueban el procesamiento de datos con entradas controladas, no la recepción Bluetooth real.
+
+### 12.3. Pruebas instrumentadas de Android
+
+En `src/biometria2/app/src/androidTest/java/com/examplo/sbelelk/biometria2/LogicaNegocioFakeTest.java` se encuentran dos pruebas:
+
+- `testRecuperarMedicion`: verifica que Android recibe una medición del servidor sin errores.
+- `testCamposMedicionRecuperada`: verifica la presencia del ID, fecha, tipo y valor numérico.
+
+Requieren un dispositivo Android o emulador con Internet y un servidor que tenga mediciones disponibles. En la ejecución observada se obtuvo el resultado **2 passed**.
+
+### 12.4. Pruebas manuales de la SparkFun y el sistema completo
+
+Se realizaron las siguientes comprobaciones:
+
+1. **SparkFun y Monitor serie:** las publicaciones muestran un contador creciente, valores Major consecutivos y `Minor = 4321`.
+2. **Recepción y envío:** la aplicación Android se utiliza como intermediaria entre los anuncios iBeacon y el servidor REST.
+3. **Persistencia:** phpMyAdmin muestra mediciones consecutivas con valor `4321`, con intervalos observados de 30 segundos.
+4. **Consulta web:** la interfaz mostró la última medición con ID `313`, tipo `O3` y valor `4321`.
+
+Estas evidencias son coherentes con el recorrido **SparkFun → Android → API REST → MySQL → web**. Los mensajes del Monitor serie por sí solos no certifican la recepción BLE, y esta comprobación manual no sustituye una batería automatizada de pruebas de hardware.
+
+### 12.5. Alcance y resultados
+
+Se han verificado directamente la ejecución de PHP y la conexión MySQL en Plesk, dos pruebas instrumentadas de recuperación en Android y la visualización de mediciones en la base de datos y la web.
+
+Los archivos de pruebas adicionales están incluidos en el repositorio, pero es necesario comprobar y conservar sus resultados de ejecución para acreditar cada prueba.
+
+La batería existente valida los casos principales del Sprint 0, aunque no garantiza cobertura exhaustiva ni sustituye la revisión del agente corrector de la asignatura.
 
 ## 13. Documentación de diseño
 
@@ -349,4 +398,8 @@ Estos documentos incluyen las operaciones, firmas lógicas, tipos de datos y res
 
 ## 14. Estado del Sprint 0
 
-En el repositorio están implementados los componentes necesarios para el flujo de comunicación entre la placa BLE
+En el repositorio están implementados los componentes necesarios para el flujo de comunicación entre la placa BLE, la aplicación Android, el servidor REST, la base de datos MySQL y la interfaz web.
+
+Las pruebas y comprobaciones realizadas aportan evidencias del funcionamiento de los componentes principales y de su integración.
+
+La validación final del Sprint 0 requiere comprobar el cumplimiento de la rúbrica y ejecutar el agente corrector de la asignatura.
