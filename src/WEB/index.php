@@ -16,8 +16,8 @@ Autor: Soufiane Belfquih El Khalfi
 Proyecto: Biometría y Medio Ambiente - Sprint 0
 Aportación: Implementación de la interfaz web.
 
-Fecha: pendiente de comprobar en el historial original.
-Copyright (c) 2026 Soufiane Belfquih El Khalfi
+Fecha: 30/09/2026
+Copyright  Soufiane
 --------------------------------------------------------------
 -->
 
