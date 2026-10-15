@@ -1,7 +1,33 @@
+
 <?php
 
+// --------------------------------------------------------------
+// Archivo: servidor.php
+//
+// Descripción:
+// Gestiona las peticiones HTTP de la API REST.
+// Permite guardar mediciones y recuperar la última medición
+// almacenada mediante la lógica de negocio.
+//
+// Autor: Soufiane Belfquih El Khalfi
+// Proyecto: Biometría y Medio Ambiente - Sprint 0
+// Aportación: Comunicación REST entre clientes y servidor.
+//
+// Fecha: 30/09/2026
+// Copyright: soufiane
+// --------------------------------------------------------------
 
-// Envía una respuesta JSON y finaliza la petición.
+
+// --------------------------------------------------------------
+// Función: responder()
+//
+// Diseño lógico:
+// estado: N, datos: Respuesta
+//     --> responder()
+//
+// Establece el código HTTP, convierte los datos a JSON,
+// envía la respuesta al cliente y finaliza la petición.
+// --------------------------------------------------------------
 function responder(int $estado, array $datos): void
 {
     http_response_code($estado);
@@ -15,10 +41,15 @@ function responder(int $estado, array $datos): void
     exit;
 }
 
-// Obtiene la ruta y el método de la petición.
+// --------------------------------------------------------------
+// Obtener la ruta y el método de la petición.
+// --------------------------------------------------------------
 $ruta = $_GET['ruta'] ?? parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $metodo = $_SERVER['REQUEST_METHOD'];
 
+// --------------------------------------------------------------
+// Definir las rutas y los métodos HTTP permitidos.
+// --------------------------------------------------------------
 $rutas = [
     '/' => 'GET',
     '/index.php' => 'GET',
@@ -27,23 +58,33 @@ $rutas = [
     '/recuperamedicion' => 'GET',
 ];
 
+// --------------------------------------------------------------
+// Comprobar que la ruta solicitada existe.
+// --------------------------------------------------------------
 if (!is_string($ruta) || !isset($rutas[$ruta])) {
     responder(404, ['error' => 'Ruta no encontrada.']);
 }
 
+// --------------------------------------------------------------
+// Comprobar que se utiliza el método HTTP permitido.
+// --------------------------------------------------------------
 if ($metodo !== $rutas[$ruta]) {
     header('Allow: ' . $rutas[$ruta]);
     responder(405, ['error' => 'Método no permitido.']);
 }
 
-// Muestra la página web.
+// --------------------------------------------------------------
+// Mostrar la página web.
+// --------------------------------------------------------------
 if ($ruta === '/' || $ruta === '/index.php') {
     header('Content-Type: text/html; charset=utf-8');
     require __DIR__ . '/../index.php';
     exit;
 }
 
-// Entrega el archivo JavaScript.
+// --------------------------------------------------------------
+// Entregar el archivo JavaScript.
+// --------------------------------------------------------------
 if ($ruta === '/LogicaNegocioFakeWEB.js') {
     header('Content-Type: application/javascript; charset=utf-8');
     readfile(__DIR__ . '/../LogicaNegocioFakeWEB.js');
@@ -52,7 +93,16 @@ if ($ruta === '/LogicaNegocioFakeWEB.js') {
 
 try {
 
-    // POST: guarda una nueva medición.
+    // ----------------------------------------------------------
+    // Operación: guardarMedicion()
+    //
+    // Diseño lógico:
+    // fecha: Text, tipo: Text, valor: R
+    //     --> guardarMedicion() --> Text
+    //
+    // Recibe una petición POST, valida sus datos y utiliza
+    // la lógica de negocio para almacenar la medición.
+    // ----------------------------------------------------------
     if ($ruta === '/Guardamedicion') {
 
         $tipoContenido = strtolower(trim(explode(
@@ -118,7 +168,7 @@ try {
         }
 
         // Conecta con la lógica de negocio.
-        $logica = require __DIR__ . '/conexion.php';
+        $logica = require __DIR__ . '/../database/conexion.php';
 
         // Guarda únicamente los datos necesarios.
         $id = $logica->guardarMedicion(
@@ -130,8 +180,16 @@ try {
         responder(201, ['id' => $id]);
     }
 
-    // GET: recupera la última medición.
-    $logica = require __DIR__ . '/conexion.php';
+    // ----------------------------------------------------------
+    // Operación: recuperarMedicion()
+    //
+    // Diseño lógico:
+    // recuperarMedicion() --> Medicion ∪ {null}
+    //
+    // Obtiene la última medición mediante la lógica de negocio
+    // y devuelve la respuesta correspondiente al cliente.
+    // ----------------------------------------------------------
+    $logica = require __DIR__ . '/../database/conexion.php';
 
     $medicion = $logica->recuperarMedicion();
 
@@ -145,12 +203,19 @@ try {
 
 } catch (InvalidArgumentException $error) {
 
+    // ----------------------------------------------------------
+    // Devolver un error cuando un valor no es válido.
+    // ----------------------------------------------------------
     responder(422, [
         'error' => $error->getMessage(),
     ]);
 
 } catch (Throwable $error) {
 
+    // ----------------------------------------------------------
+    // Registrar los errores internos y devolver una respuesta
+    // genérica sin mostrar detalles internos al cliente.
+    // ----------------------------------------------------------
     error_log((string) $error);
 
     responder(500, [
